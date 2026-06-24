@@ -33,7 +33,7 @@ function blit(canvas: Grid, sprite: Grid, ox: number, oy: number): void {
 const PADX = 1;                          // 左右各留 1px,供 shake 水平抖动(dx∈{-1,0,1})
 export function composeCanvas(
   skin: Skin, bodyKey: BodyKey, prop: Grid | null, adult = false, bob = 0, dx = 0,
-  hat: Grid | null = null, effect: Grid | null = null,
+  hat: Grid | null = null, effect: Grid | null = null, emote: Grid | null = null,
 ): Grid {
   const body = skin[bodyKey];
   const bodyW = body[0].length;
@@ -47,6 +47,8 @@ export function composeCanvas(
   // 头顶装备:戴了帽子用帽子,否则成体戴金冠
   const head = hat ?? (adult ? CROWN : null);
   if (head) blit(canvas, head, ox + Math.floor((bodyW - head[0].length) / 2), oy);
+  // 情绪符号:漫画式飘在头部右上方(略高于头、偏右,贴着头不太远)
+  if (emote) blit(canvas, emote, ox + Math.floor(bodyW / 2) + 2, Math.max(0, oy - 1));
   // 临时特效:头顶上方居中飘(随角色一起浮)
   if (effect) blit(canvas, effect, ox + Math.floor((bodyW - effect[0].length) / 2), Math.max(0, oy - 1));
   if (prop) blit(canvas, prop, PADX + bodyW + GAP, Hc - prop.length - 1); // 道具不抖
@@ -101,10 +103,10 @@ export function dialogBox(lines: string[], dividerIdx?: number): string[] {
 export function renderScenePanel(
   skin: Skin, bodyKey: BodyKey, kind: SceneKind, animFrame: number,
   caption: string, status: string, adult = false, bob = 0, dx = 0,
-  hat: Grid | null = null, effect: Grid | null = null,
+  hat: Grid | null = null, effect: Grid | null = null, emote: Grid | null = null,
 ): string {
   const prop = propForScene(kind, animFrame);
-  const rows = toHalfBlockRows(composeCanvas(skin, bodyKey, prop, adult, bob, dx, hat, effect));
+  const rows = toHalfBlockRows(composeCanvas(skin, bodyKey, prop, adult, bob, dx, hat, effect, emote));
   const capLines = wrapByWidth(caption, 36, 3);                   // 对话区宽一倍(24→36)、最多 3 行
   const box = dialogBox([...capLines, status], capLines.length);  // 台词区 ├──┤ 状态区
   for (let i = 0; i < box.length; i++) {

@@ -338,11 +338,11 @@ function toHalfBlockRows(grid) {
         const [br, bg, bb] = rgb(b);
         s += `\x1B[38;2;${tr};${tg};${tb};48;2;${br};${bg};${bb}m\u2580\x1B[0m`;
       } else if (t) {
-        const [r, g, bl] = rgb(t);
-        s += `\x1B[38;2;${r};${g};${bl}m\u2580\x1B[0m`;
+        const [r, g2, bl] = rgb(t);
+        s += `\x1B[38;2;${r};${g2};${bl}m\u2580\x1B[0m`;
       } else if (b) {
-        const [r, g, bl] = rgb(b);
-        s += `\x1B[38;2;${r};${g};${bl}m\u2584\x1B[0m`;
+        const [r, g2, bl] = rgb(b);
+        s += `\x1B[38;2;${r};${g2};${bl}m\u2584\x1B[0m`;
       } else {
         s += " ";
       }
@@ -375,7 +375,7 @@ function blit(canvas, sprite, ox, oy) {
   }
 }
 var PADX = 1;
-function composeCanvas(skin, bodyKey, prop, adult = false, bob = 0, dx = 0, hat = null, effect = null) {
+function composeCanvas(skin, bodyKey, prop, adult = false, bob = 0, dx = 0, hat = null, effect = null, emote = null) {
   const body = skin[bodyKey];
   const bodyW = body[0].length;
   const H = Math.min(body.length, MAX_H);
@@ -387,6 +387,7 @@ function composeCanvas(skin, bodyKey, prop, adult = false, bob = 0, dx = 0, hat 
   blit(canvas, body, ox, oy);
   const head = hat ?? (adult ? CROWN : null);
   if (head) blit(canvas, head, ox + Math.floor((bodyW - head[0].length) / 2), oy);
+  if (emote) blit(canvas, emote, ox + Math.floor(bodyW / 2) + 2, Math.max(0, oy - 1));
   if (effect) blit(canvas, effect, ox + Math.floor((bodyW - effect[0].length) / 2), Math.max(0, oy - 1));
   if (prop) blit(canvas, prop, PADX + bodyW + GAP, Hc - prop.length - 1);
   return canvas;
@@ -428,9 +429,9 @@ function dialogBox(lines, dividerIdx) {
   out.push(`\u2570${bar}\u256F`);
   return out;
 }
-function renderScenePanel(skin, bodyKey, kind, animFrame, caption, status, adult = false, bob = 0, dx = 0, hat = null, effect = null) {
+function renderScenePanel(skin, bodyKey, kind, animFrame, caption, status, adult = false, bob = 0, dx = 0, hat = null, effect = null, emote = null) {
   const prop = propForScene(kind, animFrame);
-  const rows = toHalfBlockRows(composeCanvas(skin, bodyKey, prop, adult, bob, dx, hat, effect));
+  const rows = toHalfBlockRows(composeCanvas(skin, bodyKey, prop, adult, bob, dx, hat, effect, emote));
   const capLines = wrapByWidth(caption, 36, 3);
   const box = dialogBox([...capLines, status], capLines.length);
   for (let i = 0; i < box.length; i++) {
@@ -696,6 +697,32 @@ function recallCaption(userMsgs, idx) {
   if (!m.trim()) return null;
   const frame = FRAMES[(idx % FRAMES.length + FRAMES.length) % FRAMES.length];
   return frame(clip(m));
+}
+
+// src/view/emotes.ts
+var Y2 = "#ffe24a";
+var R = "#ff5a5a";
+var B = "#8fd0ff";
+var g = (rows, map) => rows.map((r) => [...r].map((c) => c === "." ? null : map[c] ?? null));
+var SPARKLE = g([".Y.", "YYY", ".Y."], { Y: Y2 });
+var DOTS = g([".....", "B.B.B"], { B });
+var EXCLAIM = g(["RR", "RR", "..", "RR"], { R });
+var SWEAT = g([".B", "BB", "BB"], { B });
+function emoteFor(mood) {
+  switch (mood) {
+    case "thinking":
+      return DOTS;
+    case "working":
+      return SWEAT;
+    case "done":
+      return SPARKLE;
+    case "confused":
+      return EXCLAIM;
+    case "evolving":
+      return SPARKLE;
+    default:
+      return null;
+  }
 }
 
 // src/view/progress.ts
@@ -980,8 +1007,21 @@ function main() {
   const kind = say ? "none" : sceneFor(state, ate);
   const idx = Math.floor(now / 3e3);
   const animFrame = Math.floor(now / 1500);
-  const breathe = [1, 0, 1, 2][Math.floor(now / 700) % 4];
-  const sway = [0, 0, 0, 1, 0, 0, 0, -1][Math.floor(now / 900) % 8];
+  const ph2 = animFrame % 2, ph4 = Math.floor(now / 700) % 4;
+  const moodMotion = {
+    done: { bob: ph2 ? 0 : 2, dx: 0 },
+    // 开心蹦
+    thinking: { bob: [1, 1, 0, 1][ph4], dx: 0 },
+    // 歪头慢晃
+    working: { bob: [1, 0, 2, 0][ph4], dx: 0 },
+    // 埋头快颠
+    confused: { bob: 1, dx: ph2 ? 1 : -1 },
+    // 懵了乱抖
+    evolving: { bob: ph2 ? 0 : 2, dx: 0 }
+    // 升天大跳
+  };
+  const idleBreathe = { bob: [1, 0, 1, 2][ph4], dx: [0, 0, 0, 1, 0, 0, 0, -1][Math.floor(now / 900) % 8] };
+  const motion = moodMotion[state.mood] ?? idleBreathe;
   let caption = say?.text ?? captionForScene(state, kind, idx);
   if (!say && kind === "sleep") {
     if (idx % 5 === 4) {
@@ -992,7 +1032,7 @@ function main() {
       if (gen.length) caption = gen[Math.floor(idx / 3) % gen.length];
     }
   }
-  let bob = breathe, dx = sway;
+  let bob = motion.bob, dx = motion.dx;
   if (say?.fresh && say.react === "nod") {
     bob = animFrame % 2 ? 2 : 0;
     dx = 0;
@@ -1000,6 +1040,7 @@ function main() {
     bob = 1;
     dx = animFrame % 2 ? 1 : -1;
   }
+  const emote = say ? null : emoteFor(state.mood);
   const prestige = readPrestige(dir);
   const adult = isAdult(state);
   const skin = loadSkin(dir);
@@ -1009,7 +1050,7 @@ function main() {
   const eff = effectActive(wallet, now);
   const effectGrid = eff ? itemById(eff.id)?.grid ?? null : null;
   process.stdout.write(
-    renderScenePanel(skin, bodyKeyFor(state), kind, animFrame, caption, formatStatusLine(state, prestige, coins), adult, bob, dx, hat, effectGrid) + "\n"
+    renderScenePanel(skin, bodyKeyFor(state), kind, animFrame, caption, formatStatusLine(state, prestige, coins), adult, bob, dx, hat, effectGrid, emote) + "\n"
   );
 }
 main();
