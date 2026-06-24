@@ -1,0 +1,3 @@
+PASS  egg_idle vs hatchling_done: 57.42% (需 >2%)
+PASS  hatchling_done vs builder_working: 50.00% (需 >2%)
+PASS  builder_working vs scholar_working: 18.36% (需 >2%)

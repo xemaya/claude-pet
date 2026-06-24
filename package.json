@@ -1,0 +1,43 @@
+{
+  "name": "claude-pet",
+  "version": "0.1.0",
+  "description": "A pixel chibi companion in your Claude Code status line that grows, levels up, and changes job as you code.",
+  "type": "module",
+  "bin": {
+    "claude-pet": "bin/cli.mjs"
+  },
+  "files": [
+    "bin",
+    "dist",
+    "hooks",
+    "tools",
+    "commands",
+    "src",
+    "CREDITS.md"
+  ],
+  "keywords": [
+    "claude-code",
+    "statusline",
+    "pet",
+    "tamagotchi",
+    "pixel-art",
+    "terminal"
+  ],
+  "license": "MIT",
+  "scripts": {
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "build:statusline": "esbuild src/statusline/run.ts --bundle --platform=node --format=esm --outfile=dist/statusline.mjs",
+    "build:shop": "esbuild src/cli/shop.ts --bundle --platform=node --format=esm --outfile=dist/shop.mjs",
+    "build": "npm run build:statusline && npm run build:shop",
+    "verify:statusline": "npm run build:statusline && node harness/verify-statusline.mjs",
+    "prepublishOnly": "npm run build"
+  },
+  "devDependencies": {
+    "@types/node": "^26.0.0",
+    "esbuild": "^0.28.1",
+    "playwright": "^1.61.1",
+    "typescript": "^5.5.0",
+    "vitest": "^2.0.0"
+  }
+}
