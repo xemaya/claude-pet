@@ -923,6 +923,22 @@ function readWallet(dir) {
     return parseWallet(null);
   }
 }
+function readGenLines(dir, n = 40) {
+  try {
+    const lines = readFileSync(join(dir, "lines.jsonl"), "utf8").trim().split("\n");
+    const out = [];
+    for (const l of lines) {
+      try {
+        const o = JSON.parse(l);
+        if (typeof o?.text === "string") out.push(o.text);
+      } catch {
+      }
+    }
+    return out.slice(-n);
+  } catch {
+    return [];
+  }
+}
 function readUserMsgs(dir, n = 8) {
   try {
     const lines = readFileSync(join(dir, "chat-history.jsonl"), "utf8").trim().split("\n");
@@ -967,9 +983,14 @@ function main() {
   const breathe = [1, 0, 1, 2][Math.floor(now / 700) % 4];
   const sway = [0, 0, 0, 1, 0, 0, 0, -1][Math.floor(now / 900) % 8];
   let caption = say?.text ?? captionForScene(state, kind, idx);
-  if (!say && kind === "sleep" && idx % 5 === 4) {
-    const recall = recallCaption(readUserMsgs(dir), Math.floor(idx / 5));
-    if (recall) caption = recall;
+  if (!say && kind === "sleep") {
+    if (idx % 5 === 4) {
+      const recall = recallCaption(readUserMsgs(dir), Math.floor(idx / 5));
+      if (recall) caption = recall;
+    } else if (idx % 3 === 1) {
+      const gen = readGenLines(dir);
+      if (gen.length) caption = gen[Math.floor(idx / 3) % gen.length];
+    }
   }
   let bob = breathe, dx = sway;
   if (say?.fresh && say.react === "nod") {
