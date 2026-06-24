@@ -6,8 +6,11 @@ const P: Record<string, string | null> = {
   k: '#241208', K: '#3a2410',          // 黑/深棕(礼帽)
   n: '#7a4a1e', y: '#e6c45a', Y: '#fff0a0', // 草帽:棕边/麦黄/高光
   r: '#d6314a', R: '#ff5a72', e: '#fff7f0', // 红/亮红/白(圣诞、爱心)
-  p: '#e58fb0', P: '#c46a90',          // 粉(猫耳/蝴蝶结)
+  p: '#e58fb0', P: '#c46a90',          // 粉(猫耳/蝴蝶结/兔耳内)
   g: '#5fd0c0', b: '#5aa0ff', o: '#ffb347', // 杂色(特效:青/蓝/橙星)
+  v: '#6a8f3a', V: '#9ab85a',          // 橄榄(渔夫帽)
+  u: '#8a8f98', U: '#c5cad2', t: '#ffffff', // 灰/浅灰/白(鲨鱼帽牙)
+  z: '#bfe0ff',                        // 浅蓝(zzz)
 };
 
 function exp(rows: string[]): Grid {
@@ -66,6 +69,37 @@ const HATS: ShopItem[] = [
       'pp..p..pp',
     ]),
   },
+  {
+    id: 'bucket', name: '渔夫帽', price: 30, type: 'hat', grid: exp([
+      '..vvvvv..',
+      '.vvvvvvv.',
+      'VVVVVVVVV',
+      '.VV...VV.',
+    ]),
+  },
+  {
+    id: 'beret', name: '贝雷帽', price: 45, type: 'hat', grid: exp([
+      '......k..',
+      '.RRRRRR..',
+      'RRRRRRRR.',
+      '.kkkkkk..',
+    ]),
+  },
+  {
+    id: 'bunny', name: '兔耳', price: 45, type: 'hat', grid: exp([
+      'e.......e',
+      'ePe...ePe',
+      'ePe...ePe',
+      '.e.....e.',
+    ]),
+  },
+  {
+    id: 'shark', name: '鲨鱼帽', price: 55, type: 'hat', grid: exp([
+      '.uuuuuuu.',
+      'uuUUUUUuu',
+      'utttttttu',
+    ]),
+  },
 ];
 
 // ── 零食(临时特效,买了头顶飘几秒)──
@@ -86,6 +120,21 @@ const EFFECTS: ShopItem[] = [
       'oogYYboo.',
       '.b.o.g...',
       'b..o..g..',
+    ]),
+  },
+  {
+    id: 'stars', name: '星星雨', price: 22, type: 'effect', durationMs: 8000, grid: exp([
+      '..Y...Y..',
+      'Y...Y....',
+      '...Y...Y.',
+      '.Y...Y...',
+    ]),
+  },
+  {
+    id: 'zzz', name: '瞌睡', price: 18, type: 'effect', durationMs: 8000, grid: exp([
+      '....zz',
+      '..zz..',
+      'zz....',
     ]),
   },
 ];

@@ -1,6 +1,6 @@
 import { propForScene, SceneKind } from './props';
 import { BodyKey } from './spriteKey';
-import { Skin } from './skin';
+import { Skin, ExprKey, spriteFor } from './skin';
 import { Grid, toHalfBlockRows } from './halfblock';
 
 const GAP = 6;       // 角色与道具间距(像素列)
@@ -34,8 +34,9 @@ const PADX = 1;                          // 左右各留 1px,供 shake 水平抖
 export function composeCanvas(
   skin: Skin, bodyKey: BodyKey, prop: Grid | null, adult = false, bob = 0, dx = 0,
   hat: Grid | null = null, effect: Grid | null = null, emote: Grid | null = null,
+  expr: ExprKey = 'neutral',
 ): Grid {
-  const body = skin[bodyKey];
+  const body = spriteFor(skin, bodyKey, expr);
   const bodyW = body[0].length;
   const H = Math.min(body.length, MAX_H);
   const Hc = H + 2;                       // 上下各留 1px,供浮动
@@ -104,9 +105,10 @@ export function renderScenePanel(
   skin: Skin, bodyKey: BodyKey, kind: SceneKind, animFrame: number,
   caption: string, status: string, adult = false, bob = 0, dx = 0,
   hat: Grid | null = null, effect: Grid | null = null, emote: Grid | null = null,
+  expr: ExprKey = 'neutral',
 ): string {
   const prop = propForScene(kind, animFrame);
-  const rows = toHalfBlockRows(composeCanvas(skin, bodyKey, prop, adult, bob, dx, hat, effect, emote));
+  const rows = toHalfBlockRows(composeCanvas(skin, bodyKey, prop, adult, bob, dx, hat, effect, emote, expr));
   const capLines = wrapByWidth(caption, 36, 3);                   // 对话区宽一倍(24→36)、最多 3 行
   const box = dialogBox([...capLines, status], capLines.length);  // 台词区 ├──┤ 状态区
   for (let i = 0; i < box.length; i++) {

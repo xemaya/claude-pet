@@ -1,18 +1,21 @@
 import { PetEvent } from './events';
+import { CONFIG } from './config';
 
-// 金币:只在"完成一轮对话"(turn_end)才产 1 枚;工具调用不产币(否则随便跑跑就几百)。
-// 花币不动 xp(成长纯净)。想调难度改这两个常数即可。
+// 金币:完成一轮对话产 1(工具不产);另外每跨一个里程碑发一笔奖励,给攒币节奏。
+// 花币不动 xp(成长纯净)。想调难度改这几个常数即可。
 export const COIN_PER_TURN = 1;
 export const COIN_PER_TOOL = 0;
+export const COIN_PER_MILESTONE = 60;
 
-/** 从事件流 fold 出"已赚金币"(确定性、无副作用)。 */
+/** 从事件流 fold 出"已赚金币":对话产币 + 跨里程碑奖励(确定性、无副作用)。 */
 export function coinsEarned(events: PetEvent[]): number {
-  let c = 0;
+  let c = 0, xp = 0;
   for (const e of events) {
-    if (e.type === 'turn_end') c += COIN_PER_TURN;
-    else if (e.type === 'tool_start') c += COIN_PER_TOOL;
+    if (e.type === 'turn_end') { c += COIN_PER_TURN; xp += CONFIG.xpPerTurn; }
+    else if (e.type === 'tool_start') { c += COIN_PER_TOOL; xp += CONFIG.xpPerTool; }
   }
-  return c;
+  const milestones = CONFIG.milestones.filter((m) => xp >= m).length;
+  return c + milestones * COIN_PER_MILESTONE;
 }
 
 export interface ActiveEffect { id: string; until: number; }

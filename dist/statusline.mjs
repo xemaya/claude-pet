@@ -320,127 +320,6 @@ function propForScene(kind, animFrame) {
   }
 }
 
-// src/view/halfblock.ts
-function rgb(c) {
-  return [parseInt(c.slice(1, 3), 16), parseInt(c.slice(3, 5), 16), parseInt(c.slice(5, 7), 16)];
-}
-function toHalfBlockRows(grid) {
-  const h = grid.length;
-  const w = h ? grid[0].length : 0;
-  const rows = [];
-  for (let cy = 0; cy < Math.floor(h / 2); cy++) {
-    let s = "";
-    for (let x = 0; x < w; x++) {
-      const t = grid[cy * 2][x];
-      const b = grid[cy * 2 + 1][x];
-      if (t && b) {
-        const [tr, tg, tb] = rgb(t);
-        const [br, bg, bb] = rgb(b);
-        s += `\x1B[38;2;${tr};${tg};${tb};48;2;${br};${bg};${bb}m\u2580\x1B[0m`;
-      } else if (t) {
-        const [r, g2, bl] = rgb(t);
-        s += `\x1B[38;2;${r};${g2};${bl}m\u2580\x1B[0m`;
-      } else if (b) {
-        const [r, g2, bl] = rgb(b);
-        s += `\x1B[38;2;${r};${g2};${bl}m\u2584\x1B[0m`;
-      } else {
-        s += " ";
-      }
-    }
-    rows.push(s);
-  }
-  return rows;
-}
-
-// src/view/scene.ts
-var GAP = 6;
-var MAX_H = 24;
-var G = "#f7e36a";
-var Y = "#fff3a0";
-var O = "#8a6a10";
-var CROWN = [
-  [G, null, G, null, G, null, G],
-  [O, G, G, G, G, G, O],
-  [O, Y, Y, Y, Y, Y, O]
-];
-function blit(canvas, sprite, ox, oy) {
-  for (let y = 0; y < sprite.length; y++) {
-    for (let x = 0; x < sprite[y].length; x++) {
-      const c = sprite[y][x];
-      if (!c) continue;
-      const cy = oy + y;
-      const cx = ox + x;
-      if (cy >= 0 && cy < canvas.length && cx >= 0 && cx < canvas[0].length) canvas[cy][cx] = c;
-    }
-  }
-}
-var PADX = 1;
-function composeCanvas(skin, bodyKey, prop, adult = false, bob = 0, dx = 0, hat = null, effect = null, emote = null) {
-  const body = skin[bodyKey];
-  const bodyW = body[0].length;
-  const H = Math.min(body.length, MAX_H);
-  const Hc = H + 2;
-  const W = (prop ? bodyW + GAP + prop[0].length : bodyW) + PADX * 2;
-  const canvas = Array.from({ length: Hc }, () => Array(W).fill(null));
-  const oy = Math.max(0, Math.min(2, bob));
-  const ox = PADX + dx;
-  blit(canvas, body, ox, oy);
-  const head = hat ?? (adult ? CROWN : null);
-  if (head) blit(canvas, head, ox + Math.floor((bodyW - head[0].length) / 2), oy);
-  if (emote) blit(canvas, emote, ox + Math.floor(bodyW / 2) + 2, Math.max(0, oy - 1));
-  if (effect) blit(canvas, effect, ox + Math.floor((bodyW - effect[0].length) / 2), Math.max(0, oy - 1));
-  if (prop) blit(canvas, prop, PADX + bodyW + GAP, Hc - prop.length - 1);
-  return canvas;
-}
-function dispWidth(s) {
-  let w = 0;
-  for (const ch of s) w += /[ᄀ-ᅟ⺀-꓏가-힣豈-﫿︰-﹏＀-｠￠-￦　-〿]/.test(ch) ? 2 : 1;
-  return w;
-}
-function wrapByWidth(text, max, maxLines = 3) {
-  const out = [];
-  let cur = "", w = 0;
-  for (const ch of text) {
-    const cw = dispWidth(ch);
-    if (w + cw > max && cur) {
-      out.push(cur);
-      cur = "";
-      w = 0;
-    }
-    cur += ch;
-    w += cw;
-  }
-  if (cur) out.push(cur);
-  if (out.length > maxLines) {
-    const t = out.slice(0, maxLines);
-    t[maxLines - 1] = t[maxLines - 1].replace(/.$/, "\u2026");
-    return t;
-  }
-  return out.length ? out : [""];
-}
-function dialogBox(lines, dividerIdx) {
-  const inner = Math.max(...lines.map(dispWidth));
-  const bar = "\u2500".repeat(inner + 2);
-  const out = [`\u256D${bar}\u256E`];
-  for (let i = 0; i < lines.length; i++) {
-    if (dividerIdx !== void 0 && i === dividerIdx) out.push(`\u251C${bar}\u2524`);
-    out.push(`\u2502 ${lines[i]}${" ".repeat(inner - dispWidth(lines[i]))} \u2502`);
-  }
-  out.push(`\u2570${bar}\u256F`);
-  return out;
-}
-function renderScenePanel(skin, bodyKey, kind, animFrame, caption, status, adult = false, bob = 0, dx = 0, hat = null, effect = null, emote = null) {
-  const prop = propForScene(kind, animFrame);
-  const rows = toHalfBlockRows(composeCanvas(skin, bodyKey, prop, adult, bob, dx, hat, effect, emote));
-  const capLines = wrapByWidth(caption, 36, 3);
-  const box = dialogBox([...capLines, status], capLines.length);
-  for (let i = 0; i < box.length; i++) {
-    const r = 1 + i;
-    if (r < rows.length) rows[r] = `${rows[r]}  ${box[i]}`;
-  }
-  return rows.map((l) => "\x1B[0m" + l).join("\n");
-}
-
 // src/view/animalSprites.ts
 var ANIMAL_SPRITES = {
   egg: [
@@ -554,82 +433,217 @@ var ANIMAL_SPRITES = {
 };
 
 // src/view/skin.ts
+function spriteFor(skin, body, expr) {
+  const f = skin[body];
+  if (Array.isArray(f)) return f;
+  return f[expr] ?? f.neutral ?? Object.values(f)[0];
+}
 var DEFAULT_SKIN = ANIMAL_SPRITES;
+
+// src/view/halfblock.ts
+function rgb(c) {
+  return [parseInt(c.slice(1, 3), 16), parseInt(c.slice(3, 5), 16), parseInt(c.slice(5, 7), 16)];
+}
+function toHalfBlockRows(grid) {
+  const h = grid.length;
+  const w = h ? grid[0].length : 0;
+  const rows = [];
+  for (let cy = 0; cy < Math.floor(h / 2); cy++) {
+    let s = "";
+    for (let x = 0; x < w; x++) {
+      const t = grid[cy * 2][x];
+      const b = grid[cy * 2 + 1][x];
+      if (t && b) {
+        const [tr, tg, tb] = rgb(t);
+        const [br, bg, bb] = rgb(b);
+        s += `\x1B[38;2;${tr};${tg};${tb};48;2;${br};${bg};${bb}m\u2580\x1B[0m`;
+      } else if (t) {
+        const [r, g2, bl] = rgb(t);
+        s += `\x1B[38;2;${r};${g2};${bl}m\u2580\x1B[0m`;
+      } else if (b) {
+        const [r, g2, bl] = rgb(b);
+        s += `\x1B[38;2;${r};${g2};${bl}m\u2584\x1B[0m`;
+      } else {
+        s += " ";
+      }
+    }
+    rows.push(s);
+  }
+  return rows;
+}
+
+// src/view/scene.ts
+var GAP = 6;
+var MAX_H = 24;
+var G = "#f7e36a";
+var Y = "#fff3a0";
+var O = "#8a6a10";
+var CROWN = [
+  [G, null, G, null, G, null, G],
+  [O, G, G, G, G, G, O],
+  [O, Y, Y, Y, Y, Y, O]
+];
+function blit(canvas, sprite, ox, oy) {
+  for (let y = 0; y < sprite.length; y++) {
+    for (let x = 0; x < sprite[y].length; x++) {
+      const c = sprite[y][x];
+      if (!c) continue;
+      const cy = oy + y;
+      const cx = ox + x;
+      if (cy >= 0 && cy < canvas.length && cx >= 0 && cx < canvas[0].length) canvas[cy][cx] = c;
+    }
+  }
+}
+var PADX = 1;
+function composeCanvas(skin, bodyKey, prop, adult = false, bob = 0, dx = 0, hat = null, effect = null, emote = null, expr = "neutral") {
+  const body = spriteFor(skin, bodyKey, expr);
+  const bodyW = body[0].length;
+  const H = Math.min(body.length, MAX_H);
+  const Hc = H + 2;
+  const W = (prop ? bodyW + GAP + prop[0].length : bodyW) + PADX * 2;
+  const canvas = Array.from({ length: Hc }, () => Array(W).fill(null));
+  const oy = Math.max(0, Math.min(2, bob));
+  const ox = PADX + dx;
+  blit(canvas, body, ox, oy);
+  const head = hat ?? (adult ? CROWN : null);
+  if (head) blit(canvas, head, ox + Math.floor((bodyW - head[0].length) / 2), oy);
+  if (emote) blit(canvas, emote, ox + Math.floor(bodyW / 2) + 2, Math.max(0, oy - 1));
+  if (effect) blit(canvas, effect, ox + Math.floor((bodyW - effect[0].length) / 2), Math.max(0, oy - 1));
+  if (prop) blit(canvas, prop, PADX + bodyW + GAP, Hc - prop.length - 1);
+  return canvas;
+}
+function dispWidth(s) {
+  let w = 0;
+  for (const ch of s) w += /[ᄀ-ᅟ⺀-꓏가-힣豈-﫿︰-﹏＀-｠￠-￦　-〿]/.test(ch) ? 2 : 1;
+  return w;
+}
+function wrapByWidth(text, max, maxLines = 3) {
+  const out = [];
+  let cur = "", w = 0;
+  for (const ch of text) {
+    const cw = dispWidth(ch);
+    if (w + cw > max && cur) {
+      out.push(cur);
+      cur = "";
+      w = 0;
+    }
+    cur += ch;
+    w += cw;
+  }
+  if (cur) out.push(cur);
+  if (out.length > maxLines) {
+    const t = out.slice(0, maxLines);
+    t[maxLines - 1] = t[maxLines - 1].replace(/.$/, "\u2026");
+    return t;
+  }
+  return out.length ? out : [""];
+}
+function dialogBox(lines, dividerIdx) {
+  const inner = Math.max(...lines.map(dispWidth));
+  const bar = "\u2500".repeat(inner + 2);
+  const out = [`\u256D${bar}\u256E`];
+  for (let i = 0; i < lines.length; i++) {
+    if (dividerIdx !== void 0 && i === dividerIdx) out.push(`\u251C${bar}\u2524`);
+    out.push(`\u2502 ${lines[i]}${" ".repeat(inner - dispWidth(lines[i]))} \u2502`);
+  }
+  out.push(`\u2570${bar}\u256F`);
+  return out;
+}
+function renderScenePanel(skin, bodyKey, kind, animFrame, caption, status, adult = false, bob = 0, dx = 0, hat = null, effect = null, emote = null, expr = "neutral") {
+  const prop = propForScene(kind, animFrame);
+  const rows = toHalfBlockRows(composeCanvas(skin, bodyKey, prop, adult, bob, dx, hat, effect, emote, expr));
+  const capLines = wrapByWidth(caption, 36, 3);
+  const box = dialogBox([...capLines, status], capLines.length);
+  for (let i = 0; i < box.length; i++) {
+    const r = 1 + i;
+    if (r < rows.length) rows[r] = `${rows[r]}  ${box[i]}`;
+  }
+  return rows.map((l) => "\x1B[0m" + l).join("\n");
+}
 
 // src/view/captions.ts
 var POOLS = {
   egg: [
-    "\u65B0\u4EBA\u62A5\u5230!",
-    "\u8FD8\u5728\u719F\u6089\u73AF\u5883\u2026",
-    "\u8BF7\u591A\u6307\u6559~"
+    "\u65B0\u4EBA\u62A5\u5230!\u8BF7\u591A\u6307\u6559~",
+    "\u8FD8\u5728\u8BFB\u8FD9\u4ED3\u5E93\u7684\u5C4E\u5C71\u2026",
+    "\u6211\u4F1A\u5F88\u5FEB\u4E0A\u624B\u7684(\u5927\u6982)",
+    "Hello, World! \u662F\u6211\u5566"
   ],
   idle: [
-    "\u2026\u2026(\u6253\u76F9 \u{1F4A4})",
-    "\u5728\u7B49\u4F60\u5F00\u5DE5",
-    "\u65E0\u804A\u5730\u6570 token",
-    "\u8981\u4E0D\u2026\u518D\u5199\u4E24\u884C?"
+    "\u2026\u2026(\u5047\u88C5\u5728\u6302\u673A \u{1F4A4})",
+    "\u54FC,\u5C31\u77E5\u9053\u4F60\u4F1A\u56DE\u6765",
+    "\u518D\u4E0D\u5199\u6211\u8981\u957F\u8349\u4E86 \u{1F331}",
+    "\u5728\u6570\u4F60\u4ECA\u5929\u6478\u4E86\u51E0\u6B21\u9C7C",
+    'console.log("\u5728\u5417")',
+    "\u9700\u6C42\u5462?\u9700\u6C42\u5728\u54EA?"
   ],
   thinking: [
-    "\u8BA9\u6211\u60F3\u60F3\u2026",
-    "\u8111\u5B50\u8F6C\u8D77\u6765\u4E86",
-    "\u55EF\u2026\u2026\u8FD9\u9898\u6709\u70B9\u4E1C\u897F"
+    "\u8BA9\u6211\u60F3\u60F3\u2026(\u5176\u5B9E\u5728\u88C5)",
+    "\u8111\u5185 npm install \u4E2D\u2026",
+    "\u8FD9\u9898\u6211\u4F1A,\u5C31\u662F\u5634\u786C",
+    "\u522B\u50AC,\u601D\u8DEF\u5728 loading"
   ],
   working: [
-    "\u5E72\u5C31\u5B8C\u4E86",
-    "\u624B\u5728\u52A8\u4E86",
-    "\u4E13\u6CE8.exe \u8FD0\u884C\u4E2D"
+    "\u5E72\u5C31\u5B8C\u4E86 awa",
+    "\u624B\u901F\u62C9\u6EE1 \u2328\uFE0F",
+    "\u4E13\u6CE8.exe \u5DF2\u542F\u52A8",
+    "\u522B\u6253\u6270,\u6211\u5728\u5FC3\u6D41\u91CC",
+    "\u8FD9\u884C\u6211\u5199\u5F97\u771F\u4F18\u96C5(\u81EA\u5938)"
   ],
   done: [
-    "\u641E\u5B9A!\u{1F389}",
-    "\u8FD9\u8F6E\u6536\u5DE5",
-    "\u53C8\u662F\u9AD8\u4EA7\u7684\u4E00\u5929",
-    "\u2705 \u4E0B\u4E00\u4E2A"
+    "\u641E\u5B9A!\u8FD9\u6709\u5565\u96BE\u7684(\u624D\u4E0D\u662F\u4FA5\u5E78)",
+    "commit message \u53C8\u662F 'fix'?",
+    "\u2705 \u4E0B\u4E00\u4E2A,\u522B\u677E\u61C8",
+    "\u8DD1\u901A\u4E86\u2026\u6211\u53EF\u6CA1\u5728\u5077\u5077\u9AD8\u5174",
+    "\u6536\u5DE5,\u8BB0\u5F97 push \u554A\u5582"
   ],
   confused: [
-    "\u54A6?\u51FA\u5C94\u5B50\u4E86",
-    "\u7B49\u4E00\u4E0B\u2026\u8FD9\u4E0D\u5BF9",
-    "\u6211\u770B\u770B\u54EA\u91CC\u7EA2\u4E86"
+    "\u8BF6?\u7EA2\u4E86\u2026\u4E0D\u662F\u6211\u7684\u9505",
+    "\u8FD9 bug \u6BD4\u6211\u7684\u50CF\u7D20\u8FD8\u7CCA",
+    "\u53C8\u8981\u53BB StackOverflow \u6284\u4E86?",
+    "\u5148\u522B\u614C,\u516B\u6210\u662F\u7F13\u5B58",
+    "\u5B83\u6628\u5929\u8FD8\u597D\u597D\u7684(\u7ECF\u5178\u7529\u9505)"
   ],
   evolving: [
     "\u6211\u8F6C\u804C\u5566!\u2728",
-    "\u8131\u80CE\u6362\u9AA8!",
-    "\u5347\u7EA7\u2014\u2014!"
+    "\u8131\u80CE\u6362\u9AA8!\u522B\u7728\u773C",
+    "\u5347\u7EA7\u2014\u2014!\u8BB0\u5F97\u4EF0\u671B\u6211"
   ],
   eat: [
-    "\u597D\u5403~ \u{1F36A}",
-    "\u80FD\u91CF+1",
-    "\u8FB9\u5403\u8FB9\u5E72"
+    "\u597D\u5403~(\u624D\u4E0D\u662F\u4E3A\u4E86\u4F60\u5582)\u{1F36A}",
+    "\u80FD\u91CF +1,\u7EE7\u7EED\u5377",
+    "\u8FB9\u5403\u8FB9\u5E72,\u8FD9\u5C31\u662F\u7A0B\u5E8F\u5458"
   ],
   battle: [
     "\u5403\u6211\u4E00\u51FB!",
     "\u8FD9 bug \u6211\u76EF\u4E0A\u4E86 \u{1F50D}",
-    "\u54EA\u91CC\u8DD1!",
-    "\u770B\u62DB\u2014\u2014"
+    "\u54EA\u91CC\u8DD1!\u65AD\u70B9\u5DF2\u57CB",
+    "\u770B\u62DB\u2014\u2014debugger \u51FA\u52A8"
   ],
   sleep: [
     "\u2026\u2026zzZ \u{1F4A4}",
-    "\u6253\u4E2A\u76F9\u2026",
-    "\u53EB\u6211\u5C31\u9192",
-    "(\u53D1\u5446\u4E2D)"
+    "\u6253\u4E2A\u76F9,\u53EB\u6211\u5C31\u9192",
+    "\u68A6\u5230 CI \u5168\u7EFF\u4E86\u2026",
+    "(\u5047\u88C5\u5728\u6302\u673A,\u5176\u5B9E\u5728\u7B49\u4F60)"
   ],
   // 分支 × 干活 的专属吐槽
   builder_working: [
     "\u53EE\u53EE\u5F53\u5F53\u9020\u8D77\u6765 \u{1F528}",
-    "\u53C8\u76D6\u4E86\u4E00\u95F4",
+    "\u53C8\u76D6\u4E00\u95F4(\u6280\u672F\u503A?\u6CA1\u542C\u8FC7)",
     "\u4EE3\u7801\u6DFB\u7816\u52A0\u74E6",
-    "\u7ED3\u6784\u5728\u957F\u5927"
+    "\u91CD\u6784\u4F7F\u6211\u5FEB\u4E50 \u{1F527}"
   ],
   debugger_working: [
-    "\u8FD9 bug \u6211\u76EF\u4E0A\u4E86 \u{1F50D}",
+    "\u51F6\u624B\u5C31\u5728\u8FD9\u51E0\u884C\u91CC \u{1F50D}",
     "\u53EF\u7591\u2026\u975E\u5E38\u53EF\u7591",
-    "\u8BA9\u6211\u770B\u770B\u5806\u6808",
-    "\u51F6\u624B\u5C31\u5728\u8FD9\u51E0\u884C\u91CC"
+    "console.log \u5927\u6CD5\u597D",
+    "\u65AD\u70B9\u6446\u597D,\u5C31\u7B49\u5B83\u649E\u4E0A\u6765"
   ],
   scholar_working: [
-    "\u7FFB\u4E66\u4E2D \u{1F4D6}",
-    "\u8FD9\u6BB5\u6211\u8BFB\u8FC7\u2026",
+    "\u7FFB\u6587\u6863\u4E2D \u{1F4D6}",
+    "\u8FD9\u6BB5\u6211\u8BFB\u8FC7(\u5176\u5B9E\u6CA1)",
     "\u77E5\u8BC6 +1",
-    "\u8BA9\u6211\u67E5\u67E5\u6587\u6863"
+    "RTFM \u8BF4\u7684\u5C31\u662F\u4F60\u54E6"
   ]
 };
 var TIPS = [
@@ -761,13 +775,20 @@ function formatStatusLine(state, prestige = 0, coins) {
 // src/core/coins.ts
 var COIN_PER_TURN = 1;
 var COIN_PER_TOOL = 0;
+var COIN_PER_MILESTONE = 60;
 function coinsEarned(events) {
-  let c = 0;
+  let c = 0, xp = 0;
   for (const e of events) {
-    if (e.type === "turn_end") c += COIN_PER_TURN;
-    else if (e.type === "tool_start") c += COIN_PER_TOOL;
+    if (e.type === "turn_end") {
+      c += COIN_PER_TURN;
+      xp += CONFIG.xpPerTurn;
+    } else if (e.type === "tool_start") {
+      c += COIN_PER_TOOL;
+      xp += CONFIG.xpPerTool;
+    }
   }
-  return c;
+  const milestones = CONFIG.milestones.filter((m) => xp >= m).length;
+  return c + milestones * COIN_PER_MILESTONE;
 }
 function emptyWallet() {
   return { owned: [], equipped: null, spent: 0 };
@@ -809,11 +830,20 @@ var P2 = {
   // 红/亮红/白(圣诞、爱心)
   p: "#e58fb0",
   P: "#c46a90",
-  // 粉(猫耳/蝴蝶结)
+  // 粉(猫耳/蝴蝶结/兔耳内)
   g: "#5fd0c0",
   b: "#5aa0ff",
-  o: "#ffb347"
+  o: "#ffb347",
   // 杂色(特效:青/蓝/橙星)
+  v: "#6a8f3a",
+  V: "#9ab85a",
+  // 橄榄(渔夫帽)
+  u: "#8a8f98",
+  U: "#c5cad2",
+  t: "#ffffff",
+  // 灰/浅灰/白(鲨鱼帽牙)
+  z: "#bfe0ff"
+  // 浅蓝(zzz)
 };
 function exp2(rows) {
   return rows.map((row) => [...row].map((ch) => P2[ch] ?? null));
@@ -878,6 +908,53 @@ var HATS = [
       "pPp.p.pPp",
       "pp..p..pp"
     ])
+  },
+  {
+    id: "bucket",
+    name: "\u6E14\u592B\u5E3D",
+    price: 30,
+    type: "hat",
+    grid: exp2([
+      "..vvvvv..",
+      ".vvvvvvv.",
+      "VVVVVVVVV",
+      ".VV...VV."
+    ])
+  },
+  {
+    id: "beret",
+    name: "\u8D1D\u96F7\u5E3D",
+    price: 45,
+    type: "hat",
+    grid: exp2([
+      "......k..",
+      ".RRRRRR..",
+      "RRRRRRRR.",
+      ".kkkkkk.."
+    ])
+  },
+  {
+    id: "bunny",
+    name: "\u5154\u8033",
+    price: 45,
+    type: "hat",
+    grid: exp2([
+      "e.......e",
+      "ePe...ePe",
+      "ePe...ePe",
+      ".e.....e."
+    ])
+  },
+  {
+    id: "shark",
+    name: "\u9CA8\u9C7C\u5E3D",
+    price: 55,
+    type: "hat",
+    grid: exp2([
+      ".uuuuuuu.",
+      "uuUUUUUuu",
+      "utttttttu"
+    ])
   }
 ];
 var EFFECTS = [
@@ -907,6 +984,31 @@ var EFFECTS = [
       "oogYYboo.",
       ".b.o.g...",
       "b..o..g.."
+    ])
+  },
+  {
+    id: "stars",
+    name: "\u661F\u661F\u96E8",
+    price: 22,
+    type: "effect",
+    durationMs: 8e3,
+    grid: exp2([
+      "..Y...Y..",
+      "Y...Y....",
+      "...Y...Y.",
+      ".Y...Y..."
+    ])
+  },
+  {
+    id: "zzz",
+    name: "\u778C\u7761",
+    price: 18,
+    type: "effect",
+    durationMs: 8e3,
+    grid: exp2([
+      "....zz",
+      "..zz..",
+      "zz...."
     ])
   }
 ];
@@ -986,11 +1088,33 @@ function loadSkin(dir) {
   try {
     const s = JSON.parse(readFileSync(join(dir, "skin.json"), "utf8"));
     for (const k of ["egg", "hatchling", "builder", "debugger", "scholar", "balanced"]) {
-      if (!Array.isArray(s?.[k])) return DEFAULT_SKIN;
+      const f = s?.[k];
+      const ok = Array.isArray(f) || f && typeof f === "object" && Array.isArray(f.neutral);
+      if (!ok) return DEFAULT_SKIN;
     }
     return s;
   } catch {
     return DEFAULT_SKIN;
+  }
+}
+function exprForMood(mood, now, react) {
+  if (react === "nod") return "laugh";
+  if (react === "shake") return "cry";
+  switch (mood) {
+    case "thinking":
+      return "think";
+    case "done":
+      return "laugh";
+    case "confused":
+      return "surprised";
+    case "evolving":
+      return "laugh";
+    case "working":
+      return "neutral";
+    default: {
+      const b = Math.floor(now / 1800) % 6;
+      return b === 5 ? "blink" : b === 2 ? "smile" : "neutral";
+    }
   }
 }
 function main() {
@@ -1041,6 +1165,8 @@ function main() {
     dx = animFrame % 2 ? 1 : -1;
   }
   const emote = say ? null : emoteFor(state.mood);
+  const react = say?.fresh ? say.react : void 0;
+  const expr = exprForMood(state.mood, now, react);
   const prestige = readPrestige(dir);
   const adult = isAdult(state);
   const skin = loadSkin(dir);
@@ -1050,7 +1176,7 @@ function main() {
   const eff = effectActive(wallet, now);
   const effectGrid = eff ? itemById(eff.id)?.grid ?? null : null;
   process.stdout.write(
-    renderScenePanel(skin, bodyKeyFor(state), kind, animFrame, caption, formatStatusLine(state, prestige, coins), adult, bob, dx, hat, effectGrid, emote) + "\n"
+    renderScenePanel(skin, bodyKeyFor(state), kind, animFrame, caption, formatStatusLine(state, prestige, coins), adult, bob, dx, hat, effectGrid, emote, expr) + "\n"
   );
 }
 main();

@@ -42,16 +42,41 @@ function parseNewLines(content, fromOffset) {
   return { events, newOffset: start + complete.length };
 }
 
+// src/core/config.ts
+var CONFIG = {
+  hatchXp: 150,
+  // 新人 → 见习(约 30 轮对话)
+  evolveXp: 1200,
+  // 见习 → 转职定型
+  adultXp: 6e3,
+  // 转职 → 成体(大师,加冠)
+  xpPerLevel: 100,
+  // 等级曲线分母:Lv=floor(log2(xp/100+1))+1
+  xpPerTurn: 5,
+  xpPerTool: 1,
+  balancedThreshold: 0.15,
+  idleMs: 3e4,
+  milestones: [1500, 4e3, 1e4, 22e3, 5e4]
+  // ✦ 里程碑(拉高,难很多)
+};
+
 // src/core/coins.ts
 var COIN_PER_TURN = 1;
 var COIN_PER_TOOL = 0;
+var COIN_PER_MILESTONE = 60;
 function coinsEarned(events) {
-  let c = 0;
+  let c = 0, xp = 0;
   for (const e of events) {
-    if (e.type === "turn_end") c += COIN_PER_TURN;
-    else if (e.type === "tool_start") c += COIN_PER_TOOL;
+    if (e.type === "turn_end") {
+      c += COIN_PER_TURN;
+      xp += CONFIG.xpPerTurn;
+    } else if (e.type === "tool_start") {
+      c += COIN_PER_TOOL;
+      xp += CONFIG.xpPerTool;
+    }
   }
-  return c;
+  const milestones = CONFIG.milestones.filter((m) => xp >= m).length;
+  return c + milestones * COIN_PER_MILESTONE;
 }
 function emptyWallet() {
   return { owned: [], equipped: null, spent: 0 };
@@ -90,11 +115,20 @@ var P = {
   // 红/亮红/白(圣诞、爱心)
   p: "#e58fb0",
   P: "#c46a90",
-  // 粉(猫耳/蝴蝶结)
+  // 粉(猫耳/蝴蝶结/兔耳内)
   g: "#5fd0c0",
   b: "#5aa0ff",
-  o: "#ffb347"
+  o: "#ffb347",
   // 杂色(特效:青/蓝/橙星)
+  v: "#6a8f3a",
+  V: "#9ab85a",
+  // 橄榄(渔夫帽)
+  u: "#8a8f98",
+  U: "#c5cad2",
+  t: "#ffffff",
+  // 灰/浅灰/白(鲨鱼帽牙)
+  z: "#bfe0ff"
+  // 浅蓝(zzz)
 };
 function exp(rows) {
   return rows.map((row) => [...row].map((ch) => P[ch] ?? null));
@@ -159,6 +193,53 @@ var HATS = [
       "pPp.p.pPp",
       "pp..p..pp"
     ])
+  },
+  {
+    id: "bucket",
+    name: "\u6E14\u592B\u5E3D",
+    price: 30,
+    type: "hat",
+    grid: exp([
+      "..vvvvv..",
+      ".vvvvvvv.",
+      "VVVVVVVVV",
+      ".VV...VV."
+    ])
+  },
+  {
+    id: "beret",
+    name: "\u8D1D\u96F7\u5E3D",
+    price: 45,
+    type: "hat",
+    grid: exp([
+      "......k..",
+      ".RRRRRR..",
+      "RRRRRRRR.",
+      ".kkkkkk.."
+    ])
+  },
+  {
+    id: "bunny",
+    name: "\u5154\u8033",
+    price: 45,
+    type: "hat",
+    grid: exp([
+      "e.......e",
+      "ePe...ePe",
+      "ePe...ePe",
+      ".e.....e."
+    ])
+  },
+  {
+    id: "shark",
+    name: "\u9CA8\u9C7C\u5E3D",
+    price: 55,
+    type: "hat",
+    grid: exp([
+      ".uuuuuuu.",
+      "uuUUUUUuu",
+      "utttttttu"
+    ])
   }
 ];
 var EFFECTS = [
@@ -188,6 +269,31 @@ var EFFECTS = [
       "oogYYboo.",
       ".b.o.g...",
       "b..o..g.."
+    ])
+  },
+  {
+    id: "stars",
+    name: "\u661F\u661F\u96E8",
+    price: 22,
+    type: "effect",
+    durationMs: 8e3,
+    grid: exp([
+      "..Y...Y..",
+      "Y...Y....",
+      "...Y...Y.",
+      ".Y...Y..."
+    ])
+  },
+  {
+    id: "zzz",
+    name: "\u778C\u7761",
+    price: 18,
+    type: "effect",
+    durationMs: 8e3,
+    grid: exp([
+      "....zz",
+      "..zz..",
+      "zz...."
     ])
   }
 ];
