@@ -1,3 +1,4 @@
-node_modules/
-*.tsbuildinfo
-.DS_Store
+node_modules
+dist
+public/
+harness/last-report.txt

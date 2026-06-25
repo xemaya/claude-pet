@@ -320,125 +320,12 @@ function propForScene(kind, animFrame) {
   }
 }
 
-// src/view/animalSprites.ts
-var ANIMAL_SPRITES = {
-  egg: [
-    [null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null],
-    [null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null],
-    [null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null],
-    [null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null],
-    [null, null, null, null, null, null, "#feae34", "#feae34", "#feae34", null, null, null, null, null, null, null],
-    [null, null, null, null, null, "#feae34", "#feae34", "#feae34", "#fee761", "#fee761", null, null, null, null, null, null],
-    [null, null, null, null, null, "#feae34", "#feae34", "#feae34", "#fee761", "#fee761", "#feae34", null, null, null, null, null],
-    [null, null, null, null, null, "#bd6c4a", "#fee761", "#feae34", "#feae34", "#feae34", "#feae34", null, null, null, null, null],
-    [null, null, null, null, null, null, "#bd6c4a", "#feae34", "#feae34", "#feae34", "#bd6c4a", null, null, null, null, null],
-    [null, null, null, null, null, null, null, "#feae34", "#feae34", "#bd6c4a", null, null, null, null, null, null],
-    [null, null, null, null, null, null, null, "#feae34", "#fee761", "#bd6c4a", null, null, null, null, null, null],
-    [null, null, null, null, null, null, "#feae34", "#feae34", "#feae34", "#feae34", null, null, null, null, null, null],
-    [null, null, null, null, null, "#feae34", "#fee761", "#feae34", "#feae34", "#feae34", "#feae34", null, null, null, null, null],
-    [null, null, null, null, "#bd6c4a", "#feae34", "#feae34", "#feae34", "#feae34", "#feae34", "#feae34", "#bd6c4a", null, null, null, null],
-    [null, null, null, null, null, "#bd6c4a", "#bd6c4a", "#bd6c4a", "#bd6c4a", "#bd6c4a", "#bd6c4a", null, null, null, null, null],
-    [null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null]
-  ],
-  hatchling: [
-    [null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null],
-    [null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null],
-    [null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null],
-    [null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null],
-    [null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null],
-    [null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null],
-    [null, null, null, null, null, null, "#f7c282", "#f7c282", "#f7c282", "#f7c282", null, null, null, null, null, null],
-    [null, null, null, null, null, "#f7c282", "#f7c282", "#f7c282", "#f7c282", "#f7c282", "#f7c282", null, null, null, null, null],
-    [null, null, null, null, null, "#f7c282", "#262b44", "#e19a65", "#e19a65", "#262b44", "#f7c282", null, null, null, null, null],
-    [null, null, null, null, null, "#e19a65", "#f7c282", "#f7c282", "#f7c282", "#f7c282", "#e19a65", null, null, null, null, null],
-    [null, null, null, null, null, null, "#e19a65", "#e19a65", "#e19a65", "#e19a65", null, null, null, null, null, null],
-    [null, null, null, null, null, "#f7c282", "#ffffff", "#ffffff", "#ffffff", "#ffffff", "#f7c282", null, null, null, null, null],
-    [null, null, null, null, null, null, "#ffffff", "#ffffff", "#ffffff", "#ffffff", null, null, null, null, null, null],
-    [null, null, null, null, null, null, "#f7c282", null, null, "#f7c282", null, null, null, null, null, null],
-    [null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null],
-    [null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null]
-  ],
-  builder: [
-    [null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null],
-    [null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null],
-    [null, null, null, null, null, "#bd6c4a", "#bd6c4a", null, null, null, null, "#bd6c4a", "#bd6c4a", null, null, null],
-    [null, null, null, null, null, "#bd6c4a", "#763b36", "#bd6c4a", "#bd6c4a", "#bd6c4a", "#bd6c4a", "#763b36", "#bd6c4a", null, null, null],
-    [null, null, null, null, null, "#bd6c4a", "#bd6c4a", "#bd6c4a", "#bd6c4a", "#bd6c4a", "#bd6c4a", "#bd6c4a", "#bd6c4a", "#bd6c4a", null, null],
-    [null, null, null, null, "#bd6c4a", "#bd6c4a", "#bd6c4a", "#763b36", "#3f2631", "#e19a65", "#e19a65", "#3f2631", "#763b36", "#bd6c4a", null, null],
-    [null, null, null, null, "#bd6c4a", "#bd6c4a", "#bd6c4a", "#763b36", "#763b36", "#e19a65", "#e19a65", "#e19a65", "#763b36", "#bd6c4a", null, null],
-    [null, null, null, "#bd6c4a", "#bd6c4a", "#bd6c4a", "#bd6c4a", "#bd6c4a", "#bd6c4a", "#e19a65", "#52607c", "#52607c", "#bd6c4a", "#bd6c4a", null, null],
-    [null, null, "#bd6c4a", "#bd6c4a", "#bd6c4a", "#bd6c4a", "#bd6c4a", "#bd6c4a", "#bd6c4a", "#e19a65", "#52607c", "#52607c", "#bd6c4a", "#bd6c4a", null, null],
-    [null, null, "#bd6c4a", "#bd6c4a", "#bd6c4a", "#bd6c4a", "#763b36", "#bd6c4a", "#bd6c4a", "#bd6c4a", "#bd6c4a", "#bd6c4a", "#bd6c4a", null, null, null],
-    [null, null, "#bd6c4a", "#bd6c4a", "#bd6c4a", "#bd6c4a", "#bd6c4a", "#763b36", "#763b36", "#763b36", "#763b36", "#763b36", "#763b36", null, null, null],
-    [null, null, "#bd6c4a", "#bd6c4a", "#bd6c4a", "#bd6c4a", "#bd6c4a", "#bd6c4a", "#763b36", "#763b36", "#763b36", "#763b36", "#bd6c4a", null, null, null],
-    [null, null, "#bd6c4a", "#bd6c4a", "#bd6c4a", "#bd6c4a", "#bd6c4a", "#bd6c4a", "#763b36", "#763b36", "#763b36", "#763b36", "#bd6c4a", null, null, null],
-    [null, null, "#bd6c4a", "#bd6c4a", "#bd6c4a", "#bd6c4a", "#763b36", "#bd6c4a", "#bd6c4a", "#763b36", "#763b36", "#bd6c4a", "#bd6c4a", null, null, null],
-    [null, null, null, "#bd6c4a", "#bd6c4a", "#763b36", "#763b36", "#bd6c4a", "#bd6c4a", "#763b36", "#763b36", "#bd6c4a", "#bd6c4a", null, null, null],
-    [null, null, null, "#bd6c4a", "#bd6c4a", null, null, "#bd6c4a", "#bd6c4a", "#763b36", null, "#bd6c4a", "#bd6c4a", null, null, null]
-  ],
-  debugger: [
-    [null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null],
-    [null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null],
-    [null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null],
-    [null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null],
-    [null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null],
-    [null, null, null, null, null, "#ffffff", null, null, null, null, null, "#ffffff", null, null, null, null],
-    [null, null, null, null, null, "#c0cbdc", "#ffffff", "#c0cbdc", "#8b9bb4", "#c0cbdc", "#ffffff", "#c0cbdc", null, null, null, null],
-    [null, null, null, null, null, "#c0cbdc", "#3f2631", "#ffffff", "#ffffff", "#ffffff", "#3f2631", "#c0cbdc", null, null, null, null],
-    [null, null, null, null, null, "#c0cbdc", "#3f2631", "#8b9bb4", "#feae34", "#8b9bb4", "#3f2631", "#c0cbdc", null, null, null, null],
-    [null, null, null, null, "#8b9bb4", "#8b9bb4", "#c0cbdc", "#c0cbdc", "#feae34", "#c0cbdc", "#c0cbdc", "#8b9bb4", "#8b9bb4", null, null, null],
-    [null, null, null, "#8b9bb4", "#8b9bb4", "#8b9bb4", "#8b9bb4", "#8b9bb4", "#8b9bb4", "#8b9bb4", "#8b9bb4", "#c0cbdc", "#8b9bb4", null, null, null],
-    [null, null, null, "#c0cbdc", "#8b9bb4", "#8b9bb4", "#c0cbdc", "#8b9bb4", "#8b9bb4", "#c0cbdc", "#8b9bb4", "#c0cbdc", "#8b9bb4", null, null, null],
-    [null, null, null, "#c0cbdc", "#c0cbdc", "#8b9bb4", "#feae34", "#52607c", null, "#feae34", "#c0cbdc", "#8b9bb4", "#8b9bb4", null, null, null],
-    [null, null, null, null, "#c0cbdc", "#8b9bb4", null, null, null, null, "#c0cbdc", "#8b9bb4", null, null, null, null],
-    [null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null],
-    [null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null]
-  ],
-  scholar: [
-    [null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null],
-    [null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null],
-    [null, null, null, null, "#8b9bb4", null, null, null, null, null, null, null, "#8b9bb4", null, null, null],
-    [null, null, null, null, "#c0cbdc", "#c0cbdc", "#8b9bb4", "#52607c", "#52607c", "#52607c", "#8b9bb4", "#8b9bb4", "#c0cbdc", null, null, null],
-    [null, null, null, null, "#52607c", "#52607c", "#c0cbdc", "#8b9bb4", "#52607c", "#8b9bb4", "#c0cbdc", "#c0cbdc", "#52607c", null, null, null],
-    [null, null, null, null, "#8b9bb4", "#52607c", "#3f2631", "#c0cbdc", "#c0cbdc", "#c0cbdc", "#3f2631", "#52607c", "#8b9bb4", null, null, null],
-    [null, null, null, null, "#8b9bb4", "#52607c", "#3f2631", "#52607c", "#8b9bb4", "#52607c", "#3f2631", "#52607c", "#8b9bb4", null, null, null],
-    [null, null, null, null, "#8b9bb4", "#52607c", "#52607c", "#52607c", "#feae34", "#52607c", "#52607c", "#52607c", "#8b9bb4", null, null, null],
-    [null, null, null, null, "#52607c", "#8b9bb4", "#8b9bb4", "#8b9bb4", "#feae34", "#8b9bb4", "#8b9bb4", "#8b9bb4", "#52607c", null, null, null],
-    [null, null, null, "#52607c", "#52607c", "#52607c", "#52607c", "#52607c", "#52607c", "#52607c", "#52607c", "#52607c", "#52607c", null, null, null],
-    [null, null, null, "#52607c", "#52607c", "#8b9bb4", "#8b9bb4", "#c0cbdc", "#c0cbdc", "#c0cbdc", "#8b9bb4", "#52607c", "#52607c", null, null, null],
-    [null, null, null, "#52607c", "#8b9bb4", "#8b9bb4", "#8b9bb4", "#c0cbdc", "#c0cbdc", "#c0cbdc", "#8b9bb4", "#8b9bb4", "#52607c", null, null, null],
-    [null, null, "#52607c", "#52607c", "#8b9bb4", "#8b9bb4", "#52607c", "#c0cbdc", "#c0cbdc", "#52607c", "#8b9bb4", "#8b9bb4", "#52607c", "#52607c", null, null],
-    [null, null, "#52607c", "#52607c", "#8b9bb4", "#8b9bb4", "#52607c", "#52607c", "#52607c", "#52607c", "#8b9bb4", "#8b9bb4", "#52607c", "#52607c", null, null],
-    [null, null, "#8b9bb4", "#8b9bb4", "#52607c", "#8b9bb4", "#8b9bb4", "#52607c", "#52607c", "#8b9bb4", "#8b9bb4", "#52607c", "#8b9bb4", "#8b9bb4", null, null],
-    [null, null, "#8b9bb4", "#8b9bb4", "#52607c", "#8b9bb4", "#8b9bb4", null, null, "#8b9bb4", "#8b9bb4", "#52607c", "#8b9bb4", "#8b9bb4", null, null]
-  ],
-  balanced: [
-    [null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null],
-    [null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null],
-    [null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null],
-    [null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null],
-    [null, null, null, null, null, null, "#e19a65", "#e19a65", null, null, null, "#e19a65", "#e19a65", null, null, null],
-    [null, null, null, null, null, null, "#ffffff", "#bd6c4a", "#e19a65", "#e19a65", "#e19a65", "#bd6c4a", "#ffffff", null, null, null],
-    [null, null, null, null, null, null, "#bd6c4a", "#e19a65", "#e19a65", "#e19a65", "#e19a65", "#e19a65", "#bd6c4a", null, null, null],
-    [null, null, null, "#ffffff", null, null, "#bd6c4a", "#3f2631", "#bd6c4a", "#bd6c4a", "#bd6c4a", "#3f2631", "#bd6c4a", null, null, null],
-    [null, null, "#ffffff", "#ffffff", null, "#e19a65", "#e19a65", "#3f2631", "#e19a65", "#e19a65", "#e19a65", "#3f2631", "#e19a65", "#e19a65", null, null],
-    [null, null, "#bd6c4a", "#bd6c4a", null, "#bd6c4a", "#bd6c4a", "#bd6c4a", "#e19a65", "#3f2631", "#3f2631", "#e19a65", "#bd6c4a", "#bd6c4a", null, null],
-    [null, null, "#bd6c4a", "#bd6c4a", null, null, "#bd6c4a", "#e19a65", "#bd6c4a", "#3f2631", "#3f2631", "#bd6c4a", "#bd6c4a", null, null, null],
-    [null, null, "#bd6c4a", "#bd6c4a", "#e19a65", "#e19a65", "#e19a65", "#e19a65", "#ffffff", "#bd6c4a", "#bd6c4a", "#ffffff", null, null, null, null],
-    [null, null, null, "#e19a65", "#e19a65", "#e19a65", "#e19a65", "#ffffff", "#ffffff", "#ffffff", "#ffffff", "#e19a65", null, null, null, null],
-    [null, null, null, "#e19a65", "#ffffff", "#ffffff", "#e19a65", "#e19a65", "#ffffff", "#ffffff", "#e19a65", null, null, null, null, null],
-    [null, null, null, "#ffffff", null, "#bd6c4a", null, "#e19a65", null, null, "#e19a65", null, null, null, null, null],
-    [null, null, null, null, null, null, null, "#ffffff", null, null, "#ffffff", null, null, null, null, null]
-  ]
-};
-
 // src/view/skin.ts
 function spriteFor(skin, body, expr) {
   const f = skin[body];
   if (Array.isArray(f)) return f;
   return f[expr] ?? f.neutral ?? Object.values(f)[0];
 }
-var DEFAULT_SKIN = ANIMAL_SPRITES;
 
 // src/view/halfblock.ts
 function rgb(c) {
@@ -560,6 +447,122 @@ function renderScenePanel(skin, bodyKey, kind, animFrame, caption, status, adult
   }
   return rows.map((l) => "\x1B[0m" + l).join("\n");
 }
+
+// src/view/zooSprites.ts
+var ZOO_ROSTER = [
+  [
+    [null, null, null, null, null, null, null, "#e2e6f0", "#e2e6f0", "#e2e6f0", null, null, null],
+    [null, null, null, null, null, null, "#e2e6f0", "#e2e6f0", "#e2e6f0", "#e2e6f0", "#e2e6f0", null, null],
+    [null, null, null, null, null, null, "#e2e6f0", "#e2e6f0", null, "#e2e6f0", "#e2e6f0", "#e2e6f0", "#e2e6f0"],
+    [null, null, null, null, null, null, "#e2e6f0", "#e2e6f0", "#e2e6f0", "#e2e6f0", null, null, null],
+    [null, null, null, null, null, "#e2e6f0", "#e2e6f0", "#e2e6f0", "#e2e6f0", "#e2e6f0", "#e2e6f0", "#e2e6f0", null],
+    ["#e2e6f0", null, null, "#e2e6f0", "#e2e6f0", null, null, null, null, null, "#e2e6f0", null, null],
+    ["#e2e6f0", "#e2e6f0", "#e2e6f0", "#e2e6f0", "#e2e6f0", "#e2e6f0", "#e2e6f0", "#e2e6f0", "#e2e6f0", "#e2e6f0", null, null, null],
+    ["#e2e6f0", "#e2e6f0", "#e2e6f0", "#e2e6f0", "#e2e6f0", null, "#e2e6f0", "#e2e6f0", null, "#e2e6f0", "#e2e6f0", null, null],
+    ["#e2e6f0", "#e2e6f0", "#e2e6f0", "#e2e6f0", null, "#e2e6f0", "#e2e6f0", "#e2e6f0", null, "#e2e6f0", "#e2e6f0", null, null],
+    [null, "#e2e6f0", "#e2e6f0", "#e2e6f0", "#e2e6f0", null, null, null, "#e2e6f0", "#e2e6f0", "#e2e6f0", null, null],
+    [null, null, null, "#e2e6f0", "#e2e6f0", "#e2e6f0", "#e2e6f0", "#e2e6f0", "#e2e6f0", "#e2e6f0", null, null, null],
+    [null, null, null, null, null, null, "#e2e6f0", null, null, null, null, null, null]
+  ],
+  [
+    [null, null, null, null, null, null, null, "#e2e6f0", null, null, null, null],
+    [null, null, null, null, null, null, "#e2e6f0", null, "#e2e6f0", "#e2e6f0", null, null],
+    [null, null, null, null, null, null, null, "#e2e6f0", "#e2e6f0", "#e2e6f0", "#e2e6f0", null],
+    [null, null, null, null, null, null, null, "#e2e6f0", "#e2e6f0", null, "#e2e6f0", "#e2e6f0"],
+    [null, null, null, null, null, null, "#e2e6f0", "#e2e6f0", "#e2e6f0", "#e2e6f0", "#e2e6f0", null],
+    [null, null, null, null, null, "#e2e6f0", "#e2e6f0", "#e2e6f0", "#e2e6f0", "#e2e6f0", "#e2e6f0", null],
+    ["#e2e6f0", null, null, "#e2e6f0", "#e2e6f0", null, null, null, null, null, "#e2e6f0", "#e2e6f0"],
+    ["#e2e6f0", "#e2e6f0", "#e2e6f0", "#e2e6f0", "#e2e6f0", "#e2e6f0", "#e2e6f0", "#e2e6f0", "#e2e6f0", "#e2e6f0", null, null],
+    ["#e2e6f0", "#e2e6f0", "#e2e6f0", "#e2e6f0", "#e2e6f0", null, "#e2e6f0", "#e2e6f0", null, "#e2e6f0", "#e2e6f0", null],
+    ["#e2e6f0", "#e2e6f0", "#e2e6f0", "#e2e6f0", "#e2e6f0", null, "#e2e6f0", "#e2e6f0", null, "#e2e6f0", "#e2e6f0", null],
+    [null, "#e2e6f0", "#e2e6f0", "#e2e6f0", "#e2e6f0", "#e2e6f0", null, null, "#e2e6f0", "#e2e6f0", "#e2e6f0", null],
+    [null, null, null, "#e2e6f0", "#e2e6f0", "#e2e6f0", "#e2e6f0", "#e2e6f0", "#e2e6f0", "#e2e6f0", null, null],
+    [null, null, null, null, null, null, "#e2e6f0", null, null, null, null, null]
+  ],
+  [
+    [null, null, null, null, null, null, null, null, "#e2e6f0", null, "#e2e6f0", null, null, null],
+    [null, null, null, null, null, null, "#e2e6f0", "#e2e6f0", "#e2e6f0", "#e2e6f0", "#e2e6f0", "#e2e6f0", "#e2e6f0", null],
+    [null, null, null, null, null, null, null, null, "#e2e6f0", "#e2e6f0", "#e2e6f0", "#e2e6f0", null, null],
+    [null, null, null, null, null, null, null, "#e2e6f0", "#e2e6f0", null, "#e2e6f0", null, "#e2e6f0", null],
+    [null, "#e2e6f0", null, "#e2e6f0", "#e2e6f0", "#e2e6f0", null, "#e2e6f0", "#e2e6f0", "#e2e6f0", "#e2e6f0", "#e2e6f0", "#e2e6f0", "#e2e6f0"],
+    ["#e2e6f0", null, "#e2e6f0", "#e2e6f0", "#e2e6f0", "#e2e6f0", "#e2e6f0", "#e2e6f0", "#e2e6f0", "#e2e6f0", "#e2e6f0", "#e2e6f0", "#e2e6f0", "#e2e6f0"],
+    ["#e2e6f0", null, "#e2e6f0", null, "#e2e6f0", null, null, "#e2e6f0", "#e2e6f0", "#e2e6f0", null, "#e2e6f0", "#e2e6f0", null],
+    ["#e2e6f0", null, "#e2e6f0", "#e2e6f0", "#e2e6f0", null, null, "#e2e6f0", null, "#e2e6f0", null, null, null, null],
+    [null, null, "#e2e6f0", "#e2e6f0", "#e2e6f0", "#e2e6f0", "#e2e6f0", "#e2e6f0", "#e2e6f0", "#e2e6f0", null, null, null, null],
+    [null, null, "#e2e6f0", "#e2e6f0", "#e2e6f0", null, "#e2e6f0", "#e2e6f0", null, "#e2e6f0", null, null, null, null],
+    [null, null, "#e2e6f0", null, null, null, "#e2e6f0", null, null, "#e2e6f0", null, null, null, null],
+    [null, null, "#e2e6f0", null, "#e2e6f0", null, "#e2e6f0", null, null, "#e2e6f0", null, null, null, null]
+  ],
+  [
+    [null, null, null, null, null, null, null, null, "#e2e6f0", null, "#e2e6f0", null, null, null],
+    [null, null, null, null, null, null, "#e2e6f0", null, "#e2e6f0", "#e2e6f0", "#e2e6f0", null, null, null],
+    [null, null, null, null, null, null, "#e2e6f0", null, "#e2e6f0", "#e2e6f0", "#e2e6f0", "#e2e6f0", null, null],
+    [null, null, null, null, null, "#e2e6f0", null, "#e2e6f0", "#e2e6f0", null, "#e2e6f0", null, "#e2e6f0", null],
+    [null, null, null, null, null, "#e2e6f0", null, "#e2e6f0", "#e2e6f0", "#e2e6f0", "#e2e6f0", "#e2e6f0", "#e2e6f0", "#e2e6f0"],
+    [null, null, null, null, null, "#e2e6f0", null, "#e2e6f0", "#e2e6f0", "#e2e6f0", "#e2e6f0", "#e2e6f0", "#e2e6f0", "#e2e6f0"],
+    [null, "#e2e6f0", null, "#e2e6f0", "#e2e6f0", "#e2e6f0", "#e2e6f0", "#e2e6f0", "#e2e6f0", "#e2e6f0", null, "#e2e6f0", "#e2e6f0", null],
+    ["#e2e6f0", null, "#e2e6f0", "#e2e6f0", "#e2e6f0", "#e2e6f0", "#e2e6f0", "#e2e6f0", "#e2e6f0", "#e2e6f0", null, null, null, null],
+    ["#e2e6f0", null, "#e2e6f0", "#e2e6f0", "#e2e6f0", "#e2e6f0", "#e2e6f0", "#e2e6f0", "#e2e6f0", "#e2e6f0", null, null, null, null],
+    ["#e2e6f0", null, "#e2e6f0", "#e2e6f0", "#e2e6f0", "#e2e6f0", "#e2e6f0", "#e2e6f0", "#e2e6f0", "#e2e6f0", null, null, null, null],
+    ["#e2e6f0", null, "#e2e6f0", "#e2e6f0", "#e2e6f0", "#e2e6f0", "#e2e6f0", "#e2e6f0", null, "#e2e6f0", null, null, null, null],
+    ["#e2e6f0", null, "#e2e6f0", null, null, null, "#e2e6f0", null, null, "#e2e6f0", null, null, null, null],
+    [null, null, "#e2e6f0", null, "#e2e6f0", null, "#e2e6f0", null, null, "#e2e6f0", null, null, null, null],
+    [null, null, "#e2e6f0", null, "#e2e6f0", null, "#e2e6f0", null, null, "#e2e6f0", null, null, null, null]
+  ],
+  [
+    ["#e2e6f0", null, null, null, null, null, null, null, null, null, null, null, null, null],
+    [null, "#e2e6f0", null, null, null, null, null, null, null, null, null, null, null, null],
+    ["#e2e6f0", null, null, null, null, null, null, "#e2e6f0", null, null, null, null, "#e2e6f0", null],
+    [null, null, "#e2e6f0", "#e2e6f0", "#e2e6f0", "#e2e6f0", null, "#e2e6f0", "#e2e6f0", "#e2e6f0", "#e2e6f0", "#e2e6f0", "#e2e6f0", null],
+    ["#e2e6f0", "#e2e6f0", "#e2e6f0", "#e2e6f0", "#e2e6f0", "#e2e6f0", null, "#e2e6f0", "#e2e6f0", "#e2e6f0", "#e2e6f0", "#e2e6f0", "#e2e6f0", null],
+    ["#e2e6f0", "#e2e6f0", "#e2e6f0", "#e2e6f0", "#e2e6f0", null, "#e2e6f0", null, "#e2e6f0", "#e2e6f0", "#e2e6f0", "#e2e6f0", null, "#e2e6f0"],
+    ["#e2e6f0", "#e2e6f0", "#e2e6f0", "#e2e6f0", "#e2e6f0", null, "#e2e6f0", "#e2e6f0", "#e2e6f0", null, null, "#e2e6f0", "#e2e6f0", "#e2e6f0"],
+    ["#e2e6f0", "#e2e6f0", "#e2e6f0", "#e2e6f0", "#e2e6f0", null, "#e2e6f0", "#e2e6f0", null, "#e2e6f0", "#e2e6f0", null, "#e2e6f0", "#e2e6f0"],
+    ["#e2e6f0", "#e2e6f0", "#e2e6f0", "#e2e6f0", "#e2e6f0", "#e2e6f0", null, "#e2e6f0", null, "#e2e6f0", "#e2e6f0", null, "#e2e6f0", null],
+    ["#e2e6f0", "#e2e6f0", "#e2e6f0", "#e2e6f0", "#e2e6f0", "#e2e6f0", "#e2e6f0", null, null, null, null, null, null, null],
+    [null, "#e2e6f0", "#e2e6f0", "#e2e6f0", "#e2e6f0", "#e2e6f0", "#e2e6f0", "#e2e6f0", "#e2e6f0", "#e2e6f0", "#e2e6f0", "#e2e6f0", null, null],
+    [null, "#e2e6f0", null, null, "#e2e6f0", null, null, "#e2e6f0", null, null, null, "#e2e6f0", null, null]
+  ],
+  [
+    [null, null, null, null, "#e2e6f0", null, null, null, "#e2e6f0", null],
+    [null, null, null, null, "#e2e6f0", "#e2e6f0", "#e2e6f0", "#e2e6f0", "#e2e6f0", null],
+    [null, null, null, null, "#e2e6f0", null, "#e2e6f0", null, "#e2e6f0", null],
+    [null, "#e2e6f0", null, null, "#e2e6f0", "#e2e6f0", null, "#e2e6f0", "#e2e6f0", null],
+    ["#e2e6f0", "#e2e6f0", null, null, null, "#e2e6f0", "#e2e6f0", "#e2e6f0", null, null],
+    ["#e2e6f0", null, null, null, "#e2e6f0", null, null, null, "#e2e6f0", null],
+    ["#e2e6f0", null, null, null, "#e2e6f0", "#e2e6f0", "#e2e6f0", "#e2e6f0", "#e2e6f0", null],
+    ["#e2e6f0", "#e2e6f0", null, "#e2e6f0", "#e2e6f0", "#e2e6f0", "#e2e6f0", "#e2e6f0", "#e2e6f0", "#e2e6f0"],
+    [null, "#e2e6f0", null, "#e2e6f0", "#e2e6f0", "#e2e6f0", "#e2e6f0", "#e2e6f0", "#e2e6f0", "#e2e6f0"],
+    [null, "#e2e6f0", null, "#e2e6f0", "#e2e6f0", null, "#e2e6f0", null, "#e2e6f0", "#e2e6f0"],
+    [null, null, null, "#e2e6f0", "#e2e6f0", null, "#e2e6f0", null, "#e2e6f0", "#e2e6f0"],
+    [null, null, null, null, "#e2e6f0", null, "#e2e6f0", null, "#e2e6f0", null]
+  ],
+  [
+    [null, null, null, null, null, "#e2e6f0", "#e2e6f0", "#e2e6f0", "#e2e6f0", null, null, null, null, null],
+    [null, null, null, null, "#e2e6f0", "#e2e6f0", "#e2e6f0", "#e2e6f0", "#e2e6f0", "#e2e6f0", null, null, null, null],
+    ["#e2e6f0", null, null, null, "#e2e6f0", "#e2e6f0", "#e2e6f0", "#e2e6f0", "#e2e6f0", "#e2e6f0", null, null, null, "#e2e6f0"],
+    ["#e2e6f0", "#e2e6f0", null, null, "#e2e6f0", null, "#e2e6f0", "#e2e6f0", null, "#e2e6f0", null, null, "#e2e6f0", "#e2e6f0"],
+    ["#e2e6f0", "#e2e6f0", null, null, "#e2e6f0", "#e2e6f0", "#e2e6f0", "#e2e6f0", "#e2e6f0", "#e2e6f0", null, null, "#e2e6f0", "#e2e6f0"],
+    ["#e2e6f0", "#e2e6f0", null, null, null, "#e2e6f0", "#e2e6f0", "#e2e6f0", "#e2e6f0", null, null, null, "#e2e6f0", "#e2e6f0"],
+    [null, "#e2e6f0", null, null, "#e2e6f0", "#e2e6f0", "#e2e6f0", "#e2e6f0", "#e2e6f0", "#e2e6f0", null, null, "#e2e6f0", null],
+    [null, "#e2e6f0", null, "#e2e6f0", "#e2e6f0", "#e2e6f0", "#e2e6f0", "#e2e6f0", "#e2e6f0", "#e2e6f0", "#e2e6f0", null, "#e2e6f0", null],
+    [null, "#e2e6f0", null, "#e2e6f0", "#e2e6f0", "#e2e6f0", "#e2e6f0", "#e2e6f0", "#e2e6f0", "#e2e6f0", "#e2e6f0", null, "#e2e6f0", null],
+    [null, "#e2e6f0", null, "#e2e6f0", null, "#e2e6f0", null, null, "#e2e6f0", null, "#e2e6f0", null, "#e2e6f0", null],
+    [null, null, "#e2e6f0", "#e2e6f0", null, "#e2e6f0", null, null, "#e2e6f0", null, "#e2e6f0", "#e2e6f0", null, null],
+    ["#e2e6f0", null, null, null, null, "#e2e6f0", null, null, "#e2e6f0", null, null, null, null, "#e2e6f0"],
+    [null, "#e2e6f0", "#e2e6f0", "#e2e6f0", "#e2e6f0", null, null, null, null, "#e2e6f0", "#e2e6f0", "#e2e6f0", "#e2e6f0", null]
+  ],
+  [
+    [null, null, null, null, null, "#e2e6f0", null, null, "#e2e6f0", null, null, null, null, null],
+    [null, null, "#e2e6f0", null, null, "#e2e6f0", "#e2e6f0", "#e2e6f0", "#e2e6f0", null, null, "#e2e6f0", null, null],
+    [null, "#e2e6f0", "#e2e6f0", "#e2e6f0", "#e2e6f0", "#e2e6f0", "#e2e6f0", "#e2e6f0", "#e2e6f0", "#e2e6f0", "#e2e6f0", "#e2e6f0", "#e2e6f0", null],
+    ["#e2e6f0", "#e2e6f0", "#e2e6f0", "#e2e6f0", "#e2e6f0", null, "#e2e6f0", "#e2e6f0", null, "#e2e6f0", "#e2e6f0", "#e2e6f0", "#e2e6f0", "#e2e6f0"],
+    ["#e2e6f0", "#e2e6f0", "#e2e6f0", "#e2e6f0", "#e2e6f0", "#e2e6f0", "#e2e6f0", "#e2e6f0", "#e2e6f0", "#e2e6f0", "#e2e6f0", "#e2e6f0", "#e2e6f0", "#e2e6f0"],
+    ["#e2e6f0", "#e2e6f0", "#e2e6f0", "#e2e6f0", null, "#e2e6f0", "#e2e6f0", "#e2e6f0", "#e2e6f0", null, "#e2e6f0", "#e2e6f0", "#e2e6f0", "#e2e6f0"],
+    ["#e2e6f0", null, null, "#e2e6f0", null, "#e2e6f0", "#e2e6f0", "#e2e6f0", "#e2e6f0", null, "#e2e6f0", null, null, "#e2e6f0"],
+    [null, null, null, null, null, "#e2e6f0", null, null, "#e2e6f0", null, null, null, null, null]
+  ]
+];
 
 // src/view/captions.ts
 var POOLS = {
@@ -1090,12 +1093,17 @@ function loadSkin(dir) {
     for (const k of ["egg", "hatchling", "builder", "debugger", "scholar", "balanced"]) {
       const f = s?.[k];
       const ok = Array.isArray(f) || f && typeof f === "object" && Array.isArray(f.neutral);
-      if (!ok) return DEFAULT_SKIN;
+      if (!ok) return null;
     }
     return s;
   } catch {
-    return DEFAULT_SKIN;
+    return null;
   }
+}
+var ZOO_ROTATE_MS = 1e4;
+function zooSkin(now) {
+  const animal = ZOO_ROSTER[Math.floor(now / ZOO_ROTATE_MS) % ZOO_ROSTER.length];
+  return { egg: animal, hatchling: animal, builder: animal, debugger: animal, scholar: animal, balanced: animal };
 }
 function exprForMood(mood, now, react) {
   if (react === "nod") return "laugh";
@@ -1169,7 +1177,7 @@ function main() {
   const expr = exprForMood(state.mood, now, react);
   const prestige = readPrestige(dir);
   const adult = isAdult(state);
-  const skin = loadSkin(dir);
+  const skin = loadSkin(dir) ?? zooSkin(now);
   const wallet = readWallet(dir);
   const coins = balance(coinsEarned(parseNewLines(content, 0).events), wallet);
   const hat = itemById(wallet.equipped)?.grid ?? null;
