@@ -548,20 +548,33 @@ var ZOO_ROSTER = [
     [null, null, null, null, null, "#e2e6f0", null, null, "#e2e6f0", null, null, null, null, null]
   ]
 ];
+var DESK = "#46506a";
+function deskSlot(animal, H) {
+  const w = animal[0].length;
+  const slot = Array.from({ length: H }, () => new Array(w).fill(null));
+  for (let x = 0; x < w; x++) slot[H - 1][x] = DESK;
+  for (let y = Math.max(0, H - 6); y < H; y++) slot[y][w - 1] = DESK;
+  const pad = H - animal.length;
+  for (let y = 0; y < animal.length; y++) {
+    for (let x = 0; x < w; x++) {
+      const c = animal[y][x];
+      if (c) slot[pad + y][x] = c;
+    }
+  }
+  return slot;
+}
 function crewSprite(startIdx, n) {
   const len = ZOO_ROSTER.length;
   const animals = [];
   for (let i = 0; i < Math.max(1, n); i++) animals.push(ZOO_ROSTER[((startIdx + i) % len + len) % len]);
-  const H = Math.max(...animals.map((a) => a.length));
+  const H = Math.max(...animals.map((a) => a.length)) + 1;
   const GAP2 = 2;
   const rows = Array.from({ length: H }, () => []);
   for (let ai = 0; ai < animals.length; ai++) {
-    const a = animals[ai];
-    const w = a[0].length;
-    const pad = H - a.length;
+    const slot = deskSlot(animals[ai], H);
+    const w = slot[0].length;
     for (let y = 0; y < H; y++) {
-      const src = y < pad ? new Array(w).fill(null) : a[y - pad];
-      for (let x = 0; x < w; x++) rows[y].push(src[x]);
+      for (let x = 0; x < w; x++) rows[y].push(slot[y][x]);
       if (ai < animals.length - 1) for (let g2 = 0; g2 < GAP2; g2++) rows[y].push(null);
     }
   }
@@ -570,10 +583,12 @@ function crewSprite(startIdx, n) {
 
 // src/core/backlog.ts
 var WORK_PER_TOOL = 1;
-var DRAIN_PER_SEC = 0.3;
-var SWAMPED_AT = 8;
+var DRAIN_PER_SEC = 0.5;
+var BACKLOG_MAX = 99;
+var SWAMPED_AT = 10;
+var STRIKE_AT = 50;
 function headcountFor(backlog) {
-  if (backlog >= 25) return 3;
+  if (backlog >= 30) return 3;
   if (backlog >= SWAMPED_AT) return 2;
   return 1;
 }
@@ -585,7 +600,7 @@ function backlogAt(events, now) {
       const dt = (e.ts - last) / 1e3;
       backlog = Math.max(0, backlog - headcountFor(backlog) * DRAIN_PER_SEC * dt);
     }
-    if (e.type === "tool_start") backlog += WORK_PER_TOOL;
+    if (e.type === "tool_start") backlog = Math.min(BACKLOG_MAX, backlog + WORK_PER_TOOL);
     last = e.ts;
   }
   if (last !== null) {
@@ -705,6 +720,17 @@ var CLEARED = [
 function backlogCaption(backlog, idx, headcount = 1) {
   if (backlog <= 0) return pick(CLEARED, idx);
   const [u, m] = WORK_UNITS[(Math.floor(idx / 2) % WORK_UNITS.length + WORK_UNITS.length) % WORK_UNITS.length];
+  if (backlog >= STRIKE_AT) {
+    const strike = [
+      "\u96C6\u4F53\u7F62\u5DE5!\u5DF2\u8BFB\u4E71\u56DE \u{1FAA7}",
+      `\u6D3B\u7206\u4E86,${headcount} \u53EA\u4E00\u8D77\u6DA6 \u{1F3C3}`,
+      "\u8001\u677F\u7684\u9700\u6C42?\u5DF2\u8BFB\u4E0D\u56DE",
+      "\u6446\u70C2\u5C01\u9876,\u7231\u548B\u548B\u5730",
+      `${backlog} \u4EF6?\u8FD9\u73ED\u6CA1\u6CD5\u4E0A\u4E86`,
+      "\u4E09\u4E2A\u81ED\u76AE\u5320,\u4E5F\u9876\u4E0D\u8FC7\u7532\u65B9"
+    ];
+    return pick(strike, idx);
+  }
   if (headcount > 1) {
     const crew = [
       `\u52A0\u4E86 ${headcount} \u53EA\u8FD8\u662F\u505A\u4E0D\u5B8C\u2026`,

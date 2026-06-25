@@ -1,4 +1,4 @@
-import { backlogAt, headcountFor, WORK_PER_TOOL, DRAIN_PER_SEC, SWAMPED_AT } from '../../src/core/backlog';
+import { backlogAt, headcountFor, WORK_PER_TOOL, DRAIN_PER_SEC, SWAMPED_AT, BACKLOG_MAX } from '../../src/core/backlog';
 import { PetEvent } from '../../src/core/events';
 
 const tool = (ts: number): PetEvent => ({ ts, type: 'tool_start', tool: 'Edit' });
@@ -33,6 +33,12 @@ test('活多加人(headcount 随积压升)', () => {
   expect(headcountFor(0)).toBe(1);
   expect(headcountFor(SWAMPED_AT - 1)).toBe(1);
   expect(headcountFor(SWAMPED_AT)).toBe(2);
-  expect(headcountFor(25)).toBe(3);
+  expect(headcountFor(29)).toBe(2);
+  expect(headcountFor(30)).toBe(3);
   expect(headcountFor(999)).toBe(3); // 封顶 3 只
+});
+
+test('待办封顶,不飙到上千', () => {
+  const flood = Array.from({ length: 5000 }, (_, i) => tool(i)); // 5000 件活同一时刻附近
+  expect(backlogAt(flood, 5000)).toBeLessThanOrEqual(BACKLOG_MAX);
 });

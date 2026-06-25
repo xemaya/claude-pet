@@ -1,5 +1,5 @@
 import { PetState } from '../core/petState';
-import { SWAMPED_AT } from '../core/backlog';
+import { SWAMPED_AT, STRIKE_AT } from '../core/backlog';
 
 // ── 漫画台词种子词库 ──
 // 随便改:每个池子是一组候选,状态行每刷新按时间相位轮选一条。
@@ -120,6 +120,18 @@ const CLEARED = [
 export function backlogCaption(backlog: number, idx: number, headcount = 1): string {
   if (backlog <= 0) return pick(CLEARED, idx);
   const [u, m] = WORK_UNITS[((Math.floor(idx / 2) % WORK_UNITS.length) + WORK_UNITS.length) % WORK_UNITS.length];
+  if (backlog >= STRIKE_AT) {
+    // 活爆了:集体罢工 / 已读乱回(摆烂顶配)
+    const strike = [
+      '集体罢工!已读乱回 🪧',
+      `活爆了,${headcount} 只一起润 🏃`,
+      '老板的需求?已读不回',
+      '摆烂封顶,爱咋咋地',
+      `${backlog} 件?这班没法上了`,
+      '三个臭皮匠,也顶不过甲方',
+    ];
+    return pick(strike, idx);
+  }
   if (headcount > 1) {
     // 大厂逻辑:活多就加 HC;加了人也救不了——人月神话石锤
     const crew = [
