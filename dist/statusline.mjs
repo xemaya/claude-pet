@@ -548,20 +548,50 @@ var ZOO_ROSTER = [
     [null, null, null, null, null, "#e2e6f0", null, null, "#e2e6f0", null, null, null, null, null]
   ]
 ];
+function crewSprite(startIdx, n) {
+  const len = ZOO_ROSTER.length;
+  const animals = [];
+  for (let i = 0; i < Math.max(1, n); i++) animals.push(ZOO_ROSTER[((startIdx + i) % len + len) % len]);
+  const H = Math.max(...animals.map((a) => a.length));
+  const GAP2 = 2;
+  const rows = Array.from({ length: H }, () => []);
+  for (let ai = 0; ai < animals.length; ai++) {
+    const a = animals[ai];
+    const w = a[0].length;
+    const pad = H - a.length;
+    for (let y = 0; y < H; y++) {
+      const src = y < pad ? new Array(w).fill(null) : a[y - pad];
+      for (let x = 0; x < w; x++) rows[y].push(src[x]);
+      if (ai < animals.length - 1) for (let g2 = 0; g2 < GAP2; g2++) rows[y].push(null);
+    }
+  }
+  return rows;
+}
 
 // src/core/backlog.ts
 var WORK_PER_TOOL = 1;
-var DRAIN_PER_SEC = 0.1;
-var SWAMPED_AT = 10;
+var DRAIN_PER_SEC = 0.3;
+var SWAMPED_AT = 8;
+function headcountFor(backlog) {
+  if (backlog >= 25) return 3;
+  if (backlog >= SWAMPED_AT) return 2;
+  return 1;
+}
 function backlogAt(events, now) {
   let backlog = 0;
   let last = null;
   for (const e of events) {
-    if (last !== null) backlog = Math.max(0, backlog - DRAIN_PER_SEC * (e.ts - last) / 1e3);
+    if (last !== null) {
+      const dt = (e.ts - last) / 1e3;
+      backlog = Math.max(0, backlog - headcountFor(backlog) * DRAIN_PER_SEC * dt);
+    }
     if (e.type === "tool_start") backlog += WORK_PER_TOOL;
     last = e.ts;
   }
-  if (last !== null) backlog = Math.max(0, backlog - DRAIN_PER_SEC * (now - last) / 1e3);
+  if (last !== null) {
+    const dt = (now - last) / 1e3;
+    backlog = Math.max(0, backlog - headcountFor(backlog) * DRAIN_PER_SEC * dt);
+  }
   return Math.round(backlog);
 }
 
@@ -672,9 +702,20 @@ var CLEARED = [
   "\u8001\u677F\u4E0D\u5728,\u653E\u4E2A\u98CE~",
   "\u53CC\u4F11\u662F\u4E0D\u53EF\u80FD\u7684,\u4F46\u5148\u6B47\u4F1A"
 ];
-function backlogCaption(backlog, idx) {
+function backlogCaption(backlog, idx, headcount = 1) {
   if (backlog <= 0) return pick(CLEARED, idx);
   const [u, m] = WORK_UNITS[(Math.floor(idx / 2) % WORK_UNITS.length + WORK_UNITS.length) % WORK_UNITS.length];
+  if (headcount > 1) {
+    const crew = [
+      `\u52A0\u4E86 ${headcount} \u53EA\u8FD8\u662F\u505A\u4E0D\u5B8C\u2026`,
+      `${headcount} \u4E2A\u725B\u9A6C\u4E00\u8D77\u642C,\u4EBA\u6708\u795E\u8BDD\u77F3\u9524`,
+      "\u8001\u677F:\u6D3B\u591A\u5C31\u52A0\u4EBA!(\u52A0\u5B8C\u66F4\u4E71)",
+      "\u5341\u6708\u6000\u80CE,\u52A0\u4EBA\u4E5F\u53D8\u4E0D\u6210 5 \u4E2A\u6708\u554A",
+      `${headcount} \u53EA\u4E00\u8D77\u5F00\u6446,${backlog} \u4EF6\u5C31 ${backlog} \u4EF6\u5427`,
+      `\u4EBA\u662F\u52A0\u4E86,\u997C\u644A\u5F97\u66F4\u5927\u4E86`
+    ];
+    return pick(crew, idx);
+  }
   const swamped = [
     `\u6D3B\u5806\u6210\u5C71!\u8FD8\u6709 ${backlog} ${m}${u}\u6CA1\u505A (>\uFE4F<)`,
     `${backlog} ${m}${u}\u538B\u5934\u4E0A,\u6551\u547D \u{1F4A2}`,
@@ -767,12 +808,13 @@ function milestonesReached(xp) {
 }
 
 // src/statusline/format.ts
-function formatStatusLine(state, prestige = 0, wages, meals, backlog) {
+function formatStatusLine(state, prestige = 0, wages, meals, backlog, headcount = 1) {
   const lv = levelOf(state.xp);
   const promos = milestonesReached(state.xp);
   const promo = promos > 0 ? ` \u{1F3C6}${promos}` : "";
   const pre = prestige > 0 ? `${prestige}\u5468\u76EE ` : "";
-  const todo = typeof backlog === "number" ? ` \xB7 \u{1F4CB}${backlog}` : "";
+  const crew = headcount > 1 ? `\u{1F477}${headcount}` : "";
+  const todo = typeof backlog === "number" ? ` \xB7 \u{1F4CB}${backlog}${crew}` : "";
   const money = typeof wages === "number" ? ` \xB7 \u{1F4B0}${wages}` : "";
   const food = typeof meals === "number" && meals > 0 ? ` \xB7 \u{1F356}${meals}` : "";
   return `${pre}Lv${lv} ${titleFor(state)}${promo}${todo}${money}${food}`;
@@ -875,9 +917,9 @@ function loadSkin(dir) {
   }
 }
 var ZOO_ROTATE_MS = 1e4;
-function zooSkin(now) {
-  const animal = ZOO_ROSTER[Math.floor(now / ZOO_ROTATE_MS) % ZOO_ROSTER.length];
-  return { egg: animal, hatchling: animal, builder: animal, debugger: animal, scholar: animal, balanced: animal };
+function zooSkin(now, headcount) {
+  const crew = crewSprite(Math.floor(now / ZOO_ROTATE_MS), headcount);
+  return { egg: crew, hatchling: crew, builder: crew, debugger: crew, scholar: crew, balanced: crew };
 }
 function exprForMood(mood, now, react) {
   if (react === "nod") return "laugh";
@@ -915,6 +957,7 @@ function main() {
   const lastTurnTs = evs.reduce((m, e) => e.type === "turn_end" && e.ts > m ? e.ts : m, 0);
   const justAte = earned > 0 && wages === 0 && now - lastTurnTs < 6e3;
   const backlog = backlogAt(evs, now);
+  const headcount = headcountFor(backlog);
   const kind = say ? "none" : sceneFor(state, justAte);
   const idx = Math.floor(now / 3e3);
   const animFrame = Math.floor(now / 1500);
@@ -937,7 +980,7 @@ function main() {
   let caption;
   if (say) caption = say.text;
   else if (kind === "cookie" || kind === "chest" || kind === "battle") caption = captionForScene(state, kind, idx);
-  else if (backlog > 0) caption = backlogCaption(backlog, idx);
+  else if (backlog > 0) caption = backlogCaption(backlog, idx, headcount);
   else {
     caption = captionForScene(state, "sleep", idx);
     if (idx % 5 === 4) {
@@ -961,9 +1004,9 @@ function main() {
   const expr = exprForMood(state.mood, now, react);
   const prestige = readPrestige(dir);
   const adult = isAdult(state);
-  const skin = loadSkin(dir) ?? zooSkin(now);
+  const skin = loadSkin(dir) ?? zooSkin(now, headcount);
   process.stdout.write(
-    renderScenePanel(skin, bodyKeyFor(state), kind, animFrame, caption, formatStatusLine(state, prestige, wages, meals, backlog), adult, bob, dx, null, null, emote, expr) + "\n"
+    renderScenePanel(skin, bodyKeyFor(state), kind, animFrame, caption, formatStatusLine(state, prestige, wages, meals, backlog, headcount), adult, bob, dx, null, null, emote, expr) + "\n"
   );
 }
 main();

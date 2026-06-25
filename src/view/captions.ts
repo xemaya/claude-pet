@@ -113,10 +113,25 @@ const CLEARED = [
   '双休是不可能的,但先歇会',
 ];
 
-/** 待办量 → 台词:清空=摸鱼;堆成山(≥SWAMPED_AT)=抱怨;否则埋头干。工种名随 idx 轮换。 */
-export function backlogCaption(backlog: number, idx: number): string {
+/**
+ * 待办量 → 台词:清空=摸鱼;加了人(headcount>1)=人月神话吐槽;堆成山=抱怨;否则埋头干。
+ * 工种名随 idx 轮换。headcount = 当前一起干活的动物数。
+ */
+export function backlogCaption(backlog: number, idx: number, headcount = 1): string {
   if (backlog <= 0) return pick(CLEARED, idx);
   const [u, m] = WORK_UNITS[((Math.floor(idx / 2) % WORK_UNITS.length) + WORK_UNITS.length) % WORK_UNITS.length];
+  if (headcount > 1) {
+    // 大厂逻辑:活多就加 HC;加了人也救不了——人月神话石锤
+    const crew = [
+      `加了 ${headcount} 只还是做不完…`,
+      `${headcount} 个牛马一起搬,人月神话石锤`,
+      '老板:活多就加人!(加完更乱)',
+      '十月怀胎,加人也变不成 5 个月啊',
+      `${headcount} 只一起开摆,${backlog} 件就 ${backlog} 件吧`,
+      `人是加了,饼摊得更大了`,
+    ];
+    return pick(crew, idx);
+  }
   const swamped = [
     `活堆成山!还有 ${backlog} ${m}${u}没做 (>﹏<)`,
     `${backlog} ${m}${u}压头上,救命 💢`,

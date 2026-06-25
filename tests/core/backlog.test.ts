@@ -1,4 +1,4 @@
-import { backlogAt, WORK_PER_TOOL, DRAIN_PER_SEC } from '../../src/core/backlog';
+import { backlogAt, headcountFor, WORK_PER_TOOL, DRAIN_PER_SEC, SWAMPED_AT } from '../../src/core/backlog';
 import { PetEvent } from '../../src/core/events';
 
 const tool = (ts: number): PetEvent => ({ ts, type: 'tool_start', tool: 'Edit' });
@@ -27,4 +27,12 @@ test('猛干堆积、停手清空', () => {
 test('turn_end 不算派活', () => {
   const evs: PetEvent[] = [{ ts: 1000, type: 'turn_end' }];
   expect(backlogAt(evs, 1000)).toBe(0);
+});
+
+test('活多加人(headcount 随积压升)', () => {
+  expect(headcountFor(0)).toBe(1);
+  expect(headcountFor(SWAMPED_AT - 1)).toBe(1);
+  expect(headcountFor(SWAMPED_AT)).toBe(2);
+  expect(headcountFor(25)).toBe(3);
+  expect(headcountFor(999)).toBe(3); // 封顶 3 只
 });
