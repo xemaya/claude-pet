@@ -1,4 +1,5 @@
 import { PetState } from '../core/petState';
+import { SWAMPED_AT } from '../core/backlog';
 
 // ── 漫画台词种子词库 ──
 // 随便改:每个池子是一组候选,状态行每刷新按时间相位轮选一条。
@@ -99,6 +100,36 @@ export function captionFor(state: PetState, idx: number): string {
     return pick(TIPS, Math.floor(idx / 3));
   }
   return pick(poolFor(state), idx);
+}
+
+// 工种(随时间轮换):[名, 量词]
+const WORK_UNITS: [string, string][] = [
+  ['奶茶', '杯'], ['PPT', '份'], ['报表', '张'], ['周报', '份'], ['需求', '个'], ['Excel', '张'], ['会', '场'],
+];
+const CLEARED = [
+  '活干完了!摸鱼时间 🐟',
+  '难得清空,带薪发呆',
+  '老板不在,放个风~',
+  '双休是不可能的,但先歇会',
+];
+
+/** 待办量 → 台词:清空=摸鱼;堆成山(≥SWAMPED_AT)=抱怨;否则埋头干。工种名随 idx 轮换。 */
+export function backlogCaption(backlog: number, idx: number): string {
+  if (backlog <= 0) return pick(CLEARED, idx);
+  const [u, m] = WORK_UNITS[((Math.floor(idx / 2) % WORK_UNITS.length) + WORK_UNITS.length) % WORK_UNITS.length];
+  const swamped = [
+    `活堆成山!还有 ${backlog} ${m}${u}没做 (>﹏<)`,
+    `${backlog} ${m}${u}压头上,救命 💢`,
+    '又来大活??老板你有点良心',
+    `做不完了…根本做不完(${backlog} 件)`,
+  ];
+  const busy = [
+    `还剩 ${backlog} ${m}${u},埋头干`,
+    `待办 ${backlog},正在消化中…`,
+    `${backlog} ${m}${u}排队等我,马上`,
+    `搬砖.jpg(还有 ${backlog} 件)`,
+  ];
+  return pick(backlog >= SWAMPED_AT ? swamped : busy, idx);
 }
 
 /** 场景台词:按场景类别选专属池,'none' 时跟随情绪。 */

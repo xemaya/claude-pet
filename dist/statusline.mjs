@@ -419,13 +419,17 @@ function dialogBox(lines, dividerIdx) {
 }
 function renderScenePanel(skin, bodyKey, kind, animFrame, caption, status, adult = false, bob = 0, dx = 0, hat = null, effect = null, emote = null, expr = "neutral") {
   const prop = propForScene(kind, animFrame);
-  const rows = toHalfBlockRows(composeCanvas(skin, bodyKey, prop, adult, bob, dx, hat, effect, emote, expr));
+  const canvas = composeCanvas(skin, bodyKey, prop, adult, bob, dx, hat, effect, emote, expr);
+  const W = canvas[0].length;
+  const rows = toHalfBlockRows(canvas);
   const capLines = wrapByWidth(caption, 36, 3);
   const box = dialogBox([...capLines, status], capLines.length);
   for (let i = 0; i < box.length; i++) {
     const r = 1 + i;
-    if (r < rows.length) rows[r] = `${rows[r]}  ${box[i]}`;
+    while (rows.length <= r) rows.push(" ".repeat(W));
+    rows[r] = `${rows[r]}  ${box[i]}`;
   }
+  rows.push("");
   return rows.map((l) => "\x1B[0m" + l).join("\n");
 }
 
@@ -545,6 +549,22 @@ var ZOO_ROSTER = [
   ]
 ];
 
+// src/core/backlog.ts
+var WORK_PER_TOOL = 1;
+var DRAIN_PER_SEC = 0.1;
+var SWAMPED_AT = 10;
+function backlogAt(events, now) {
+  let backlog = 0;
+  let last = null;
+  for (const e of events) {
+    if (last !== null) backlog = Math.max(0, backlog - DRAIN_PER_SEC * (e.ts - last) / 1e3);
+    if (e.type === "tool_start") backlog += WORK_PER_TOOL;
+    last = e.ts;
+  }
+  if (last !== null) backlog = Math.max(0, backlog - DRAIN_PER_SEC * (now - last) / 1e3);
+  return Math.round(backlog);
+}
+
 // src/view/captions.ts
 var POOLS = {
   egg: [
@@ -637,6 +657,38 @@ function captionFor(state, idx) {
   }
   return pick(poolFor(state), idx);
 }
+var WORK_UNITS = [
+  ["\u5976\u8336", "\u676F"],
+  ["PPT", "\u4EFD"],
+  ["\u62A5\u8868", "\u5F20"],
+  ["\u5468\u62A5", "\u4EFD"],
+  ["\u9700\u6C42", "\u4E2A"],
+  ["Excel", "\u5F20"],
+  ["\u4F1A", "\u573A"]
+];
+var CLEARED = [
+  "\u6D3B\u5E72\u5B8C\u4E86!\u6478\u9C7C\u65F6\u95F4 \u{1F41F}",
+  "\u96BE\u5F97\u6E05\u7A7A,\u5E26\u85AA\u53D1\u5446",
+  "\u8001\u677F\u4E0D\u5728,\u653E\u4E2A\u98CE~",
+  "\u53CC\u4F11\u662F\u4E0D\u53EF\u80FD\u7684,\u4F46\u5148\u6B47\u4F1A"
+];
+function backlogCaption(backlog, idx) {
+  if (backlog <= 0) return pick(CLEARED, idx);
+  const [u, m] = WORK_UNITS[(Math.floor(idx / 2) % WORK_UNITS.length + WORK_UNITS.length) % WORK_UNITS.length];
+  const swamped = [
+    `\u6D3B\u5806\u6210\u5C71!\u8FD8\u6709 ${backlog} ${m}${u}\u6CA1\u505A (>\uFE4F<)`,
+    `${backlog} ${m}${u}\u538B\u5934\u4E0A,\u6551\u547D \u{1F4A2}`,
+    "\u53C8\u6765\u5927\u6D3B??\u8001\u677F\u4F60\u6709\u70B9\u826F\u5FC3",
+    `\u505A\u4E0D\u5B8C\u4E86\u2026\u6839\u672C\u505A\u4E0D\u5B8C(${backlog} \u4EF6)`
+  ];
+  const busy = [
+    `\u8FD8\u5269 ${backlog} ${m}${u},\u57CB\u5934\u5E72`,
+    `\u5F85\u529E ${backlog},\u6B63\u5728\u6D88\u5316\u4E2D\u2026`,
+    `${backlog} ${m}${u}\u6392\u961F\u7B49\u6211,\u9A6C\u4E0A`,
+    `\u642C\u7816.jpg(\u8FD8\u6709 ${backlog} \u4EF6)`
+  ];
+  return pick(backlog >= SWAMPED_AT ? swamped : busy, idx);
+}
 function captionForScene(state, kind, idx) {
   switch (kind) {
     case "chest":
@@ -715,14 +767,15 @@ function milestonesReached(xp) {
 }
 
 // src/statusline/format.ts
-function formatStatusLine(state, prestige = 0, wages, meals) {
+function formatStatusLine(state, prestige = 0, wages, meals, backlog) {
   const lv = levelOf(state.xp);
   const promos = milestonesReached(state.xp);
   const promo = promos > 0 ? ` \u{1F3C6}${promos}` : "";
   const pre = prestige > 0 ? `${prestige}\u5468\u76EE ` : "";
+  const todo = typeof backlog === "number" ? ` \xB7 \u{1F4CB}${backlog}` : "";
   const money = typeof wages === "number" ? ` \xB7 \u{1F4B0}${wages}` : "";
   const food = typeof meals === "number" && meals > 0 ? ` \xB7 \u{1F356}${meals}` : "";
-  return `${pre}Lv${lv} ${titleFor(state)}${promo} \xB7 KPI${state.xp}${money}${food}`;
+  return `${pre}Lv${lv} ${titleFor(state)}${promo}${todo}${money}${food}`;
 }
 
 // src/core/coins.ts
@@ -861,6 +914,7 @@ function main() {
   const { meals, wages } = mealsFor(earned);
   const lastTurnTs = evs.reduce((m, e) => e.type === "turn_end" && e.ts > m ? e.ts : m, 0);
   const justAte = earned > 0 && wages === 0 && now - lastTurnTs < 6e3;
+  const backlog = backlogAt(evs, now);
   const kind = say ? "none" : sceneFor(state, justAte);
   const idx = Math.floor(now / 3e3);
   const animFrame = Math.floor(now / 1500);
@@ -877,10 +931,15 @@ function main() {
     evolving: { bob: ph2 ? 0 : 2, dx: 0 }
     // 升天大跳
   };
+  const workMotion = { bob: [1, 0, 2, 0][ph4], dx: 0 };
   const idleBreathe = { bob: [1, 0, 1, 2][ph4], dx: [0, 0, 0, 1, 0, 0, 0, -1][Math.floor(now / 900) % 8] };
-  const motion = moodMotion[state.mood] ?? idleBreathe;
-  let caption = say?.text ?? captionForScene(state, kind, idx);
-  if (!say && kind === "sleep") {
+  const motion = moodMotion[state.mood] ?? (backlog > 0 ? workMotion : idleBreathe);
+  let caption;
+  if (say) caption = say.text;
+  else if (kind === "cookie" || kind === "chest" || kind === "battle") caption = captionForScene(state, kind, idx);
+  else if (backlog > 0) caption = backlogCaption(backlog, idx);
+  else {
+    caption = captionForScene(state, "sleep", idx);
     if (idx % 5 === 4) {
       const recall = recallCaption(readUserMsgs(dir), Math.floor(idx / 5));
       if (recall) caption = recall;
@@ -904,7 +963,7 @@ function main() {
   const adult = isAdult(state);
   const skin = loadSkin(dir) ?? zooSkin(now);
   process.stdout.write(
-    renderScenePanel(skin, bodyKeyFor(state), kind, animFrame, caption, formatStatusLine(state, prestige, wages, meals), adult, bob, dx, null, null, emote, expr) + "\n"
+    renderScenePanel(skin, bodyKeyFor(state), kind, animFrame, caption, formatStatusLine(state, prestige, wages, meals, backlog), adult, bob, dx, null, null, emote, expr) + "\n"
   );
 }
 main();

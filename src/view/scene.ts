@@ -108,12 +108,16 @@ export function renderScenePanel(
   expr: ExprKey = 'neutral',
 ): string {
   const prop = propForScene(kind, animFrame);
-  const rows = toHalfBlockRows(composeCanvas(skin, bodyKey, prop, adult, bob, dx, hat, effect, emote, expr));
+  const canvas = composeCanvas(skin, bodyKey, prop, adult, bob, dx, hat, effect, emote, expr);
+  const W = canvas[0].length;                                     // sprite 行的显示宽(用于补齐对话框比 sprite 高的行)
+  const rows = toHalfBlockRows(canvas);
   const capLines = wrapByWidth(caption, 36, 3);                   // 对话区宽一倍(24→36)、最多 3 行
   const box = dialogBox([...capLines, status], capLines.length);  // 台词区 ├──┤ 状态区
   for (let i = 0; i < box.length; i++) {
     const r = 1 + i; // 贴在头部高度
-    if (r < rows.length) rows[r] = `${rows[r]}  ${box[i]}`;
+    while (rows.length <= r) rows.push(' '.repeat(W)); // 对话框比 sprite 高时补空行,绝不丢掉底边框
+    rows[r] = `${rows[r]}  ${box[i]}`;
   }
+  rows.push(''); // 末尾留一空行:避免底边框被下方 UI 覆盖截断(用户要的"高一格")
   return rows.map(l => '\x1b[0m' + l).join('\n');
 }

@@ -1,0 +1,30 @@
+import { backlogAt, WORK_PER_TOOL, DRAIN_PER_SEC } from '../../src/core/backlog';
+import { PetEvent } from '../../src/core/events';
+
+const tool = (ts: number): PetEvent => ({ ts, type: 'tool_start', tool: 'Edit' });
+
+test('每个工具 +1 待办', () => {
+  const evs = [tool(1000), tool(1000), tool(1000)];
+  expect(backlogAt(evs, 1000)).toBe(3 * WORK_PER_TOOL);
+});
+
+test('随时间被消化(不为负)', () => {
+  const evs = [tool(0)]; // 1 件活
+  // 过 1 件活该消化掉的时间后 → 0
+  const drainMs = (1 / DRAIN_PER_SEC) * 1000;
+  expect(backlogAt(evs, drainMs)).toBe(0);
+  expect(backlogAt(evs, drainMs * 100)).toBe(0); // 不会变负
+});
+
+test('猛干堆积、停手清空', () => {
+  const burst = Array.from({ length: 20 }, (_, i) => tool(i * 100)); // 2s 内 20 件
+  const right_after = backlogAt(burst, 2000);
+  expect(right_after).toBeGreaterThan(10); // 堆成山
+  const drainMs = (20 / DRAIN_PER_SEC) * 1000;
+  expect(backlogAt(burst, 2000 + drainMs)).toBe(0); // 停手够久 → 清空
+});
+
+test('turn_end 不算派活', () => {
+  const evs: PetEvent[] = [{ ts: 1000, type: 'turn_end' }];
+  expect(backlogAt(evs, 1000)).toBe(0);
+});
