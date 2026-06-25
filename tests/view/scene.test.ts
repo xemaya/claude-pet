@@ -17,8 +17,8 @@ test('shake:dx 两态角色左右抖(内容不同、不裁切)', () => {
   const count = (g: typeof l) => g.flat().filter(Boolean).length;
   expect(count(l)).toBe(count(r)); // 只是位置差,像素不丢
 });
-test('道具被合成进画布(1-bit 白剪影)', () => {
-  expect(composeCanvas(DEFAULT_SKIN, 'debugger', PROPS.chest).flat()).toContain('#e2e6f0');
+test('道具被合成进画布(出现宝箱金色)', () => {
+  expect(composeCanvas(DEFAULT_SKIN, 'debugger', PROPS.chest).flat()).toContain('#d9a528');
 });
 test('dispWidth:CJK 算 2', () => {
   expect(dispWidth('出bug了')).toBe(7);

@@ -1,10 +1,15 @@
 import { Grid } from './halfblock';
 import { PetState } from '../core/petState';
 
-// 道具全部 1-bit 白剪影(与动物园动物同色),'.' = 透明、'e' = 白。
+// 共享调色板;'.' = 透明。道具用彩色,跟 1-bit 白动物拉开区分(白道具会和白动物糊一起)。
 const P: Record<string, string | null> = {
   '.': null,
-  e: '#e2e6f0',
+  o: '#4a2f1a', w: '#8a5a2a', W: '#b07a3a', g: '#d9a528', y: '#ffe04a', k: '#241208', s: '#fff7c0', // 宝箱/奖杯
+  n: '#5a3a22', c: '#cf9244', h: '#6e3f17', // 饼/鸡腿
+  m: '#3a1448', p: '#8a3aa0', P: '#b060c0', e: '#ffffff', r: '#e0455a', l: '#5a2070', // bug 怪
+  B: '#b0623a', M: '#7a5038', // 砖
+  R: '#c0392b', u: '#ece6d8', // 书(红封 + 书页)
+  G: '#f7e36a', // 闪光/星
 };
 
 function exp(rows: string[]): Grid {
@@ -14,60 +19,73 @@ function exp(rows: string[]): Grid {
 export type PropKey = 'cookie' | 'chest' | 'bug' | 'bugHit' | 'brick' | 'book';
 
 export const PROPS: Record<PropKey, Grid> = {
-  // 干饭:鸡腿 🍖(配 status 的 🍖)
   cookie: exp([
-    '..eeee..',
-    '.eeeeee.',
-    '.eeeeee.',
-    '..eeee..',
-    '...ee...',
-    '..e..e..',
+    '............',
+    '...nnnnnn...',
+    '..nccccccn..',
+    '.nccccccccn.',
+    '.ncchcccccn.',
+    '.nccccchccn.',
+    '.nchccccccn.',
+    '..nccccccn..',
+    '...nnnnnn...',
+    '............',
   ]),
-  // 升职:奖杯(替代旧宝箱)
   chest: exp([
-    'eeeeeeee',
-    'e.eeee.e',
-    'eeeeeeee',
-    '.eeeeee.',
-    '..eeee..',
-    '...ee...',
-    '..eeee..',
-    '.eeeeee.',
+    '...s....s...',
+    '..oooooooo..',
+    '.oWWWWWWWWo.',
+    '.oWggggggWo.',
+    '.oWWWWWWWWo.',
+    '.okyyyyyyko.',
+    '.owwwwwwwwo.',
+    '.owwggggwwo.',
+    '.owwwwwwwwo.',
+    '..oooooooo..',
   ]),
-  // 报错/甲方的锅:小虫
   bug: exp([
-    '.e....e.',
-    '..eeee..',
-    '.eeeeee.',
-    'eeeeeeee',
-    '.eeeeee.',
-    'e.e..e.e',
+    '...m....m...',
+    '....mmmm....',
+    '..mppppppm..',
+    '.mppppppppm.',
+    '.mpekppkepm.',
+    '.mpprrrrppm.',
+    '..mppppppm..',
+    'l..l..l..l..',
+    '............',
   ]),
-  // 挨打帧(战斗第2帧):身体微动 + 溅星,与 bug 帧不同形成动画
+  // 挨打帧:X 眼 + 头顶闪光,身体微缩(战斗第2帧)
   bugHit: exp([
-    'e.e..e.e',
-    '.eeeeee.',
-    'eeeeeeee',
-    'eeeeeeee',
-    '.e.ee.e.',
-    'e..ee..e',
+    '..G..ss..G..',
+    '...G.mm.G...',
+    '...mppppm...',
+    '..mpkppkpm..',
+    '..mpkppkpm..',
+    '..mprrrrpm..',
+    '...mppppm...',
+    '..l..ll..l..',
+    '............',
   ]),
-  // 搬砖:砖墙(留缝当砖缝)
+  // 砖墙(搬砖)
   brick: exp([
-    'eeeeeeee',
-    'eee.eeee',
-    'eeeeeeee',
-    'e.eeee.e',
-    'eeeeeeee',
+    'BBBBMBBBBB',
+    'MMMMMMMMMM',
+    'BBMBBBBBMB',
+    'MMMMMMMMMM',
+    'BBBBMBBBBB',
+    'MMMMMMMMMM',
   ]),
-  // 文档:一本书
+  // 书(红封 + 书页)
   book: exp([
-    '.eeeeee.',
-    'eeeeeeee',
-    'e.eeee.e',
-    'eeeeeeee',
-    'e.eeee.e',
-    '.eeeeee.',
+    '..oooooo..',
+    '.oRRRRRRo.',
+    '.oRRuuRRo.',
+    '.oRRRRRRo.',
+    '.oRRRRRRo.',
+    '.oRRuuRRo.',
+    '.oRRRRRRo.',
+    '.ouuuuuuo.',
+    '..oooooo..',
   ]),
 };
 
