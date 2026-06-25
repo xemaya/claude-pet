@@ -1,13 +1,21 @@
 import { PetEvent } from './events';
 import { CONFIG } from './config';
 
-// 金币:完成一轮对话产 1(工具不产);另外每跨一个里程碑发一笔奖励,给攒币节奏。
-// 花币不动 xp(成长纯净)。想调难度改这几个常数即可。
+// 工资:完成一轮对话挣 1(工具不产);另外每跨一个里程碑(升职加薪)发一笔奖金。
+// 想调难度改这几个常数即可。
 export const COIN_PER_TURN = 1;
 export const COIN_PER_TOOL = 0;
 export const COIN_PER_MILESTONE = 60;
 
-/** 从事件流 fold 出"已赚金币":对话产币 + 跨里程碑奖励(确定性、无副作用)。 */
+// 干饭经济:打工动物攒够 MEAL_COST 工资就自己买一顿吃的(自动,无需斜杠命令)。
+export const MEAL_COST = 30;
+
+/** 把已挣工资换算成"吃了几顿 + 还剩多少工资攒下一顿"(确定性、无副作用)。 */
+export function mealsFor(earned: number): { meals: number; wages: number } {
+  return { meals: Math.floor(earned / MEAL_COST), wages: earned % MEAL_COST };
+}
+
+/** 从事件流 fold 出"已挣工资":对话产币 + 跨里程碑奖金(确定性、无副作用)。 */
 export function coinsEarned(events: PetEvent[]): number {
   let c = 0, xp = 0;
   for (const e of events) {

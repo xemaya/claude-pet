@@ -138,21 +138,6 @@ function initialState(now) {
   };
 }
 
-// src/view/food.ts
-var BUILDER2 = /* @__PURE__ */ new Set(["Edit", "Write", "MultiEdit", "NotebookEdit"]);
-var SCHOLAR2 = /* @__PURE__ */ new Set(["Read", "Grep", "Glob"]);
-function foodFor(event) {
-  if (event.type === "turn_end") return "meal";
-  if (event.type === "tool_start") {
-    const t = event.tool ?? "";
-    if (BUILDER2.has(t)) return "cookie";
-    if (t === "Bash") return "bolt";
-    if (SCHOLAR2.has(t)) return "page";
-    return "crumb";
-  }
-  return null;
-}
-
 // src/statusline/project.ts
 function projectState(content, now) {
   let state = initialState(now);
@@ -162,10 +147,6 @@ function projectState(content, now) {
     state = { ...state, mood: "idle" };
   }
   return state;
-}
-function recentlyAte(content, now, windowMs = 2e3) {
-  const { events } = parseNewLines(content, 0);
-  return events.some((e) => foodFor(e) !== null && e.ts <= now && now - e.ts < windowMs);
 }
 
 // src/view/spriteKey.ts
@@ -567,94 +548,76 @@ var ZOO_ROSTER = [
 // src/view/captions.ts
 var POOLS = {
   egg: [
-    "\u65B0\u4EBA\u62A5\u5230!\u8BF7\u591A\u6307\u6559~",
-    "\u8FD8\u5728\u8BFB\u8FD9\u4ED3\u5E93\u7684\u5C4E\u5C71\u2026",
-    "\u6211\u4F1A\u5F88\u5FEB\u4E0A\u624B\u7684(\u5927\u6982)",
-    "Hello, World! \u662F\u6211\u5566"
+    "\u5165\u804C\u7B2C\u4E00\u5929,\u5DE5\u724C\u8FD8\u6CA1\u53D1\u2026",
+    "onboarding \u4E2D,\u5565\u90FD\u4E0D\u4F1A",
+    "\u8BF4\u597D\u7684\u53CC\u4F11\u5462?",
+    "\u65B0\u6765\u7684\u725B\u9A6C,\u8BF7\u591A\u5173\u7167 \u{1F402}"
   ],
   idle: [
-    "\u2026\u2026(\u5047\u88C5\u5728\u6302\u673A \u{1F4A4})",
-    "\u54FC,\u5C31\u77E5\u9053\u4F60\u4F1A\u56DE\u6765",
-    "\u518D\u4E0D\u5199\u6211\u8981\u957F\u8349\u4E86 \u{1F331}",
-    "\u5728\u6570\u4F60\u4ECA\u5929\u6478\u4E86\u51E0\u6B21\u9C7C",
-    'console.log("\u5728\u5417")',
-    "\u9700\u6C42\u5462?\u9700\u6C42\u5728\u54EA?"
+    "\u6478\u9C7C\u4E2D \u{1F41F} \u522B\u6233\u7A7F\u6211",
+    "\u5E26\u85AA\u53D1\u5446.exe",
+    "\u8001\u677F\u4E0D\u5728,\u653E\u4E2A\u98CE",
+    "\u5DE5\u4F4D\u90FD\u957F\u8611\u83C7\u4E86\u2026",
+    "\u8FD9\u70B9\u5DE5\u8D44,\u7231\u5E72\u5E72",
+    "\u4EC0\u4E48\u65F6\u5019\u53D1\u5DE5\u8D44\u554A\u5582"
   ],
   thinking: [
-    "\u8BA9\u6211\u60F3\u60F3\u2026(\u5176\u5B9E\u5728\u88C5)",
-    "\u8111\u5185 npm install \u4E2D\u2026",
-    "\u8FD9\u9898\u6211\u4F1A,\u5C31\u662F\u5634\u786C",
-    "\u522B\u50AC,\u601D\u8DEF\u5728 loading"
+    "\u5728\u7B97\u8FD9\u6708\u7EE9\u6548\u2026",
+    "\u8BA9\u6211\u60F3\u60F3\u600E\u4E48\u7529\u9505",
+    "\u8FD9\u9700\u6C42\u2026\u88C5\u6CA1\u770B\u89C1\u884C\u5417",
+    "\u8111\u5B50 buffering\u2026\u522B\u50AC"
   ],
   working: [
-    "\u5E72\u5C31\u5B8C\u4E86 awa",
-    "\u624B\u901F\u62C9\u6EE1 \u2328\uFE0F",
-    "\u4E13\u6CE8.exe \u5DF2\u542F\u52A8",
-    "\u522B\u6253\u6270,\u6211\u5728\u5FC3\u6D41\u91CC",
-    "\u8FD9\u884C\u6211\u5199\u5F97\u771F\u4F18\u96C5(\u81EA\u5938)"
+    "\u53C8\u662F\u4E3A\u8001\u677F\u642C\u7816\u7684\u4E00\u5929 \u{1F9F1}",
+    "KPI \u8FD8\u5DEE\u4EBF\u70B9\u70B9",
+    "\u642C\u7816.jpg \u8FDB\u884C\u4E2D",
+    "\u8FD9\u6D3B\u5E72\u5F97\u6211\u5C3E\u5DF4\u90FD\u79C3\u4E86",
+    "\u8D44\u672C\u5BB6\u7684\u997C\u662F\u771F\u5927\u554A"
   ],
   done: [
-    "\u641E\u5B9A!\u8FD9\u6709\u5565\u96BE\u7684(\u624D\u4E0D\u662F\u4FA5\u5E78)",
-    "commit message \u53C8\u662F 'fix'?",
-    "\u2705 \u4E0B\u4E00\u4E2A,\u522B\u677E\u61C8",
-    "\u8DD1\u901A\u4E86\u2026\u6211\u53EF\u6CA1\u5728\u5077\u5077\u9AD8\u5174",
-    "\u6536\u5DE5,\u8BB0\u5F97 push \u554A\u5582"
+    "\u4ECA\u65E5 KPI \u8FBE\u6807!(\u624D\u4E0D\u662F\u4E3A\u4F60)",
+    "\u4E0B\u73ED!\u2026\u54E6\u8FD8\u6CA1",
+    "\u53C8\u662F\u9AD8\u4EA7\u7684\u725B\u9A6C\u4E00\u5929 \u{1F402}",
+    "\u8FD9\u6CE2\u6211\u8D85\u989D\u4E86,\u52A0\u9E21\u817F\u5427\u8001\u677F",
+    "\u6536\u5DE5,\u5DE5\u8D44\u8BB0\u5F97\u6253\u554A\u5582"
   ],
   confused: [
-    "\u8BF6?\u7EA2\u4E86\u2026\u4E0D\u662F\u6211\u7684\u9505",
-    "\u8FD9 bug \u6BD4\u6211\u7684\u50CF\u7D20\u8FD8\u7CCA",
-    "\u53C8\u8981\u53BB StackOverflow \u6284\u4E86?",
-    "\u5148\u522B\u614C,\u516B\u6210\u662F\u7F13\u5B58",
-    "\u5B83\u6628\u5929\u8FD8\u597D\u597D\u7684(\u7ECF\u5178\u7529\u9505)"
+    "\u9700\u6C42\u53C8\u53CC\u53D2\u53D8\u4E86?!",
+    "\u9505\u4ECE\u5929\u964D,\u7A33\u7A33\u63A5\u4F4F",
+    "\u8FD9 bug\u2026\u80AF\u5B9A\u662F\u7532\u65B9\u7684\u9505",
+    "\u5B83\u6628\u5929\u8FD8\u597D\u597D\u7684(\u6253\u5DE5\u4EBA\u4E4B\u6B4C)",
+    "\u5148\u522B\u614C,\u516B\u6210\u662F\u7F13\u5B58"
   ],
   evolving: [
-    "\u6211\u8F6C\u804C\u5566!\u2728",
-    "\u8131\u80CE\u6362\u9AA8!\u522B\u7728\u773C",
-    "\u5347\u7EA7\u2014\u2014!\u8BB0\u5F97\u4EF0\u671B\u6211"
+    "\u6211\u5347\u804C\u52A0\u85AA\u5566!\u2728",
+    "\u559C\u63D0\u5DE5\u9F84 +1!",
+    "\u7EE9\u6548 A!\u8001\u677F\u826F\u5FC3\u53D1\u73B0?"
   ],
   eat: [
-    "\u597D\u5403~(\u624D\u4E0D\u662F\u4E3A\u4E86\u4F60\u5582)\u{1F36A}",
-    "\u80FD\u91CF +1,\u7EE7\u7EED\u5377",
-    "\u8FB9\u5403\u8FB9\u5E72,\u8FD9\u5C31\u662F\u7A0B\u5E8F\u5458"
+    "\u5DE5\u8D44\u5230\u8D26,\u5148\u6070\u4E00\u53E3 \u{1F356}",
+    "\u5E72\u996D\u662F\u6253\u5DE5\u4EBA\u7684\u5C0A\u4E25",
+    "\u8FD9\u987F\u6211\u81EA\u5DF1\u8BF7(\u8840\u6C57\u94B1)",
+    "\u5403\u9971\u4E86\u624D\u6709\u529B\u6C14\u642C\u7816"
   ],
   battle: [
-    "\u5403\u6211\u4E00\u51FB!",
     "\u8FD9 bug \u6211\u76EF\u4E0A\u4E86 \u{1F50D}",
-    "\u54EA\u91CC\u8DD1!\u65AD\u70B9\u5DF2\u57CB",
-    "\u770B\u62DB\u2014\u2014debugger \u51FA\u52A8"
+    "\u52A0\u73ED\u4E5F\u8981\u5F04\u6B7B\u4F60",
+    "\u54EA\u91CC\u8DD1!",
+    "\u770B\u62DB\u2014\u2014\u4E3A\u4E86\u51C6\u70B9\u4E0B\u73ED"
   ],
   sleep: [
-    "\u2026\u2026zzZ \u{1F4A4}",
-    "\u6253\u4E2A\u76F9,\u53EB\u6211\u5C31\u9192",
-    "\u68A6\u5230 CI \u5168\u7EFF\u4E86\u2026",
-    "(\u5047\u88C5\u5728\u6302\u673A,\u5176\u5B9E\u5728\u7B49\u4F60)"
-  ],
-  // 分支 × 干活 的专属吐槽
-  builder_working: [
-    "\u53EE\u53EE\u5F53\u5F53\u9020\u8D77\u6765 \u{1F528}",
-    "\u53C8\u76D6\u4E00\u95F4(\u6280\u672F\u503A?\u6CA1\u542C\u8FC7)",
-    "\u4EE3\u7801\u6DFB\u7816\u52A0\u74E6",
-    "\u91CD\u6784\u4F7F\u6211\u5FEB\u4E50 \u{1F527}"
-  ],
-  debugger_working: [
-    "\u51F6\u624B\u5C31\u5728\u8FD9\u51E0\u884C\u91CC \u{1F50D}",
-    "\u53EF\u7591\u2026\u975E\u5E38\u53EF\u7591",
-    "console.log \u5927\u6CD5\u597D",
-    "\u65AD\u70B9\u6446\u597D,\u5C31\u7B49\u5B83\u649E\u4E0A\u6765"
-  ],
-  scholar_working: [
-    "\u7FFB\u6587\u6863\u4E2D \u{1F4D6}",
-    "\u8FD9\u6BB5\u6211\u8BFB\u8FC7(\u5176\u5B9E\u6CA1)",
-    "\u77E5\u8BC6 +1",
-    "RTFM \u8BF4\u7684\u5C31\u662F\u4F60\u54E6"
+    "\u2026\u2026zzZ(\u5E26\u85AA\u5047\u5BD0)\u{1F4A4}",
+    "\u68A6\u5230\u53CC\u4F11\u4E86\u2026",
+    "\u53EB\u6211\u4E0B\u73ED\u5C31\u9192",
+    "\u5DE5\u4F4D\u5047\u5BD0,\u4E13\u4E1A\u7684"
   ]
 };
 var TIPS = [
   "\u{1F4AC} /pet \u8DDF\u6211\u5520\u4E24\u53E5~",
   "\u{1F44D} \u5938\u6211\u6211\u70B9\u5934,\u{1F44E} \u6211\u6447\u5934\u7ED9\u4F60\u770B",
-  "\u270D\uFE0F \u591A\u5199\u4EE3\u7801\u5582\u6211,\u6512 xp \u80FD\u5347\u7EA7\u8F6C\u804C",
-  "\u{1F528}Edit\u591A\u2192\u5DE5\u5320 \xB7 \u{1F50D}Bash\u591A\u2192\u4FA6\u63A2 \xB7 \u{1F4D6}Read\u591A\u2192\u5B66\u8005",
-  "\u2726 \u6512\u591F\u91CC\u7A0B\u7891\u5934\u9876\u4F1A\u4EAE\u661F\u661F\u54E6"
+  "\u270D\uFE0F \u4F60\u5199\u4EE3\u7801=\u7ED9\u6211\u6D3E\u6D3B,\u6512 KPI \u5347\u5DE5\u9F84",
+  "\u{1F4B0} \u5DE5\u8D44\u6512\u591F\u6211\u81EA\u5DF1\u4E70\u5403\u7684(\u4E0D\u7528\u4F60\u7BA1)",
+  "\u{1F3C6} KPI \u7834\u91CC\u7A0B\u7891\u5C31\u5347\u804C\u52A0\u85AA"
 ];
 function poolFor(state) {
   if (state.mood === "evolving") return POOLS.evolving;
@@ -662,12 +625,7 @@ function poolFor(state) {
   if (state.mood === "confused") return POOLS.confused;
   if (state.mood === "done") return POOLS.done;
   if (state.mood === "thinking") return POOLS.thinking;
-  if (state.mood === "working") {
-    if (state.branch === "builder") return POOLS.builder_working;
-    if (state.branch === "debugger") return POOLS.debugger_working;
-    if (state.branch === "scholar") return POOLS.scholar_working;
-    return POOLS.working;
-  }
+  if (state.mood === "working") return POOLS.working;
   return POOLS.idle;
 }
 function pick(pool, idx) {
@@ -688,9 +646,9 @@ function captionForScene(state, kind, idx) {
     case "battle":
       return pick(POOLS.battle, idx);
     case "build":
-      return pick(POOLS.builder_working, idx);
+      return pick(POOLS.working, idx);
     case "study":
-      return pick(POOLS.scholar_working, idx);
+      return pick(POOLS.working, idx);
     // 打盹=空闲:每 3 拍穿插一条玩法提示,教用户怎么玩
     case "sleep":
       return idx % 3 === 2 ? pick(TIPS, Math.floor(idx / 3)) : pick(POOLS.sleep, idx);
@@ -743,12 +701,6 @@ function emoteFor(mood) {
 }
 
 // src/view/progress.ts
-var BRANCH_LABEL = {
-  builder: "\u5DE5\u5320",
-  debugger: "\u4FA6\u63A2",
-  scholar: "\u5B66\u8005",
-  balanced: "\u5168\u80FD"
-};
 function levelOf(xp) {
   return Math.floor(Math.log2(Math.max(0, xp) / CONFIG.xpPerLevel + 1)) + 1;
 }
@@ -756,29 +708,31 @@ function isAdult(state) {
   return state.stage === "branched" && state.xp >= CONFIG.adultXp;
 }
 function titleFor(state) {
-  if (state.stage === "egg") return "\u65B0\u4EBA";
-  if (state.stage === "hatchling") return "\u89C1\u4E60";
-  const base = state.branch ? BRANCH_LABEL[state.branch] : "\u5168\u80FD";
-  return (isAdult(state) ? "\u5927" : "") + base;
+  return isAdult(state) ? "\u5377\u738B\u6253\u5DE5\u4EBA" : "\u6253\u5DE5\u4EBA";
 }
 function milestonesReached(xp) {
   return CONFIG.milestones.filter((m) => xp >= m).length;
 }
 
 // src/statusline/format.ts
-function formatStatusLine(state, prestige = 0, coins) {
+function formatStatusLine(state, prestige = 0, wages, meals) {
   const lv = levelOf(state.xp);
-  const stars = milestonesReached(state.xp);
-  const star = stars > 0 ? ` \u2726${stars}` : "";
+  const promos = milestonesReached(state.xp);
+  const promo = promos > 0 ? ` \u{1F3C6}${promos}` : "";
   const pre = prestige > 0 ? `${prestige}\u5468\u76EE ` : "";
-  const coin = typeof coins === "number" ? ` \xB7 \u{1FA99}${coins}` : "";
-  return `${pre}Lv${lv} ${titleFor(state)}${star} \xB7 ${state.xp}xp${coin}`;
+  const money = typeof wages === "number" ? ` \xB7 \u{1F4B0}${wages}` : "";
+  const food = typeof meals === "number" && meals > 0 ? ` \xB7 \u{1F356}${meals}` : "";
+  return `${pre}Lv${lv} ${titleFor(state)}${promo} \xB7 KPI${state.xp}${money}${food}`;
 }
 
 // src/core/coins.ts
 var COIN_PER_TURN = 1;
 var COIN_PER_TOOL = 0;
 var COIN_PER_MILESTONE = 60;
+var MEAL_COST = 30;
+function mealsFor(earned) {
+  return { meals: Math.floor(earned / MEAL_COST), wages: earned % MEAL_COST };
+}
 function coinsEarned(events) {
   let c = 0, xp = 0;
   for (const e of events) {
@@ -792,232 +746,6 @@ function coinsEarned(events) {
   }
   const milestones = CONFIG.milestones.filter((m) => xp >= m).length;
   return c + milestones * COIN_PER_MILESTONE;
-}
-function emptyWallet() {
-  return { owned: [], equipped: null, spent: 0 };
-}
-function parseWallet(raw) {
-  const w = emptyWallet();
-  if (raw && typeof raw === "object") {
-    const o = raw;
-    if (Array.isArray(o.owned)) w.owned = o.owned.filter((x) => typeof x === "string");
-    if (typeof o.equipped === "string") w.equipped = o.equipped;
-    if (typeof o.spent === "number" && o.spent >= 0) w.spent = o.spent;
-    if (o.effect && typeof o.effect === "object") {
-      const e = o.effect;
-      if (typeof e.id === "string" && typeof e.until === "number") w.effect = { id: e.id, until: e.until };
-    }
-  }
-  return w;
-}
-function balance(earned, wallet) {
-  return Math.max(0, earned - wallet.spent);
-}
-function effectActive(wallet, now) {
-  return wallet.effect && wallet.effect.until > now ? wallet.effect : null;
-}
-
-// src/view/shopItems.ts
-var P2 = {
-  ".": null,
-  k: "#241208",
-  K: "#3a2410",
-  // 黑/深棕(礼帽)
-  n: "#7a4a1e",
-  y: "#e6c45a",
-  Y: "#fff0a0",
-  // 草帽:棕边/麦黄/高光
-  r: "#d6314a",
-  R: "#ff5a72",
-  e: "#fff7f0",
-  // 红/亮红/白(圣诞、爱心)
-  p: "#e58fb0",
-  P: "#c46a90",
-  // 粉(猫耳/蝴蝶结/兔耳内)
-  g: "#5fd0c0",
-  b: "#5aa0ff",
-  o: "#ffb347",
-  // 杂色(特效:青/蓝/橙星)
-  v: "#6a8f3a",
-  V: "#9ab85a",
-  // 橄榄(渔夫帽)
-  u: "#8a8f98",
-  U: "#c5cad2",
-  t: "#ffffff",
-  // 灰/浅灰/白(鲨鱼帽牙)
-  z: "#bfe0ff"
-  // 浅蓝(zzz)
-};
-function exp2(rows) {
-  return rows.map((row) => [...row].map((ch) => P2[ch] ?? null));
-}
-var HATS = [
-  {
-    id: "straw",
-    name: "\u8349\u5E3D",
-    price: 30,
-    type: "hat",
-    grid: exp2([
-      "...nnnnn...",
-      "..nyYYYyn..",
-      ".nyyyyyyyn.",
-      "nnnnnnnnnnn"
-    ])
-  },
-  {
-    id: "catears",
-    name: "\u732B\u8033",
-    price: 40,
-    type: "hat",
-    grid: exp2([
-      "pp.......pp",
-      "pPp.....pPp",
-      ".Pp.....pP."
-    ])
-  },
-  {
-    id: "tophat",
-    name: "\u793C\u5E3D",
-    price: 50,
-    type: "hat",
-    grid: exp2([
-      "...kkkkk...",
-      "...kkkkk...",
-      "...kkkkk...",
-      ".kkkkkkkkk.",
-      "KKKKKKKKKKK"
-    ])
-  },
-  {
-    id: "santa",
-    name: "\u5723\u8BDE\u5E3D",
-    price: 60,
-    type: "hat",
-    grid: exp2([
-      "........ee.",
-      ".....rree..",
-      "..rrrrrr...",
-      ".rrrrrr....",
-      "eeeeeeeee.."
-    ])
-  },
-  {
-    id: "bow",
-    name: "\u8774\u8776\u7ED3",
-    price: 35,
-    type: "hat",
-    grid: exp2([
-      "pp..p..pp",
-      "pPp.p.pPp",
-      "pp..p..pp"
-    ])
-  },
-  {
-    id: "bucket",
-    name: "\u6E14\u592B\u5E3D",
-    price: 30,
-    type: "hat",
-    grid: exp2([
-      "..vvvvv..",
-      ".vvvvvvv.",
-      "VVVVVVVVV",
-      ".VV...VV."
-    ])
-  },
-  {
-    id: "beret",
-    name: "\u8D1D\u96F7\u5E3D",
-    price: 45,
-    type: "hat",
-    grid: exp2([
-      "......k..",
-      ".RRRRRR..",
-      "RRRRRRRR.",
-      ".kkkkkk.."
-    ])
-  },
-  {
-    id: "bunny",
-    name: "\u5154\u8033",
-    price: 45,
-    type: "hat",
-    grid: exp2([
-      "e.......e",
-      "ePe...ePe",
-      "ePe...ePe",
-      ".e.....e."
-    ])
-  },
-  {
-    id: "shark",
-    name: "\u9CA8\u9C7C\u5E3D",
-    price: 55,
-    type: "hat",
-    grid: exp2([
-      ".uuuuuuu.",
-      "uuUUUUUuu",
-      "utttttttu"
-    ])
-  }
-];
-var EFFECTS = [
-  {
-    id: "hearts",
-    name: "\u7231\u5FC3",
-    price: 20,
-    type: "effect",
-    durationMs: 8e3,
-    grid: exp2([
-      ".r.....r.",
-      "rRr...rRr",
-      ".rRr.rRr.",
-      "..rRrRr..",
-      "...rRr..."
-    ])
-  },
-  {
-    id: "fireworks",
-    name: "\u70DF\u82B1",
-    price: 25,
-    type: "effect",
-    durationMs: 8e3,
-    grid: exp2([
-      "b..o..g..",
-      ".b.o.g...",
-      "oogYYboo.",
-      ".b.o.g...",
-      "b..o..g.."
-    ])
-  },
-  {
-    id: "stars",
-    name: "\u661F\u661F\u96E8",
-    price: 22,
-    type: "effect",
-    durationMs: 8e3,
-    grid: exp2([
-      "..Y...Y..",
-      "Y...Y....",
-      "...Y...Y.",
-      ".Y...Y..."
-    ])
-  },
-  {
-    id: "zzz",
-    name: "\u778C\u7761",
-    price: 18,
-    type: "effect",
-    durationMs: 8e3,
-    grid: exp2([
-      "....zz",
-      "..zz..",
-      "zz...."
-    ])
-  }
-];
-var SHOP_ITEMS = [...HATS, ...EFFECTS];
-function itemById(id) {
-  return id ? SHOP_ITEMS.find((i) => i.id === id) ?? null : null;
 }
 
 // src/statusline/run.ts
@@ -1047,13 +775,6 @@ function readSay(dir, now) {
   } catch {
   }
   return null;
-}
-function readWallet(dir) {
-  try {
-    return parseWallet(JSON.parse(readFileSync(join(dir, "wallet.json"), "utf8")));
-  } catch {
-    return parseWallet(null);
-  }
 }
 function readGenLines(dir, n = 40) {
   try {
@@ -1133,10 +854,14 @@ function main() {
   const dir = process.env.CLAUDE_PET_DIR ?? join(homedir(), ".claude-pet");
   const now = process.env.CLAUDE_PET_NOW ? Number(process.env.CLAUDE_PET_NOW) : Date.now();
   const content = read(join(dir, "events.jsonl"));
+  const evs = parseNewLines(content, 0).events;
   const state = projectState(content, now);
-  const ate = recentlyAte(content, now);
   const say = readSay(dir, now);
-  const kind = say ? "none" : sceneFor(state, ate);
+  const earned = coinsEarned(evs);
+  const { meals, wages } = mealsFor(earned);
+  const lastTurnTs = evs.reduce((m, e) => e.type === "turn_end" && e.ts > m ? e.ts : m, 0);
+  const justAte = earned > 0 && wages === 0 && now - lastTurnTs < 6e3;
+  const kind = say ? "none" : sceneFor(state, justAte);
   const idx = Math.floor(now / 3e3);
   const animFrame = Math.floor(now / 1500);
   const ph2 = animFrame % 2, ph4 = Math.floor(now / 700) % 4;
@@ -1178,13 +903,8 @@ function main() {
   const prestige = readPrestige(dir);
   const adult = isAdult(state);
   const skin = loadSkin(dir) ?? zooSkin(now);
-  const wallet = readWallet(dir);
-  const coins = balance(coinsEarned(parseNewLines(content, 0).events), wallet);
-  const hat = itemById(wallet.equipped)?.grid ?? null;
-  const eff = effectActive(wallet, now);
-  const effectGrid = eff ? itemById(eff.id)?.grid ?? null : null;
   process.stdout.write(
-    renderScenePanel(skin, bodyKeyFor(state), kind, animFrame, caption, formatStatusLine(state, prestige, coins), adult, bob, dx, hat, effectGrid, emote, expr) + "\n"
+    renderScenePanel(skin, bodyKeyFor(state), kind, animFrame, caption, formatStatusLine(state, prestige, wages, meals), adult, bob, dx, null, null, emote, expr) + "\n"
   );
 }
 main();

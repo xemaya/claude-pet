@@ -15,14 +15,14 @@ test('轮选:同状态不同 idx 至少能选到不同台词', () => {
   const seen = new Set([0, 1, 2, 3].map(i => captionFor(st, i)));
   expect(seen.size).toBeGreaterThan(1);
 });
-test('分支 working 用专属池(debugger 含侦探梗)', () => {
+test('working 用打工搬砖池(不分职业)', () => {
   const st = s({ stage: 'branched', branch: 'debugger', mood: 'working' });
   const all = [0, 1, 2, 3].map(i => captionFor(st, i)).join(' ');
-  expect(all).toMatch(/bug|可疑|堆栈|凶手|🔍/);
+  expect(all).toMatch(/搬砖|KPI|资本家|牛马|🧱/);
 });
-test('evolving 优先于一切', () => {
+test('evolving=升职加薪,优先于一切', () => {
   const st = s({ stage: 'branched', branch: 'builder', mood: 'evolving' });
-  expect(captionFor(st, 0)).toMatch(/转职|进化|脱胎|升级/);
+  expect(captionFor(st, 0)).toMatch(/升职|加薪|工龄|绩效/);
 });
 test('负 idx 不崩', () => {
   expect(captionFor(s({ mood: 'idle' }), -1).length).toBeGreaterThan(0);

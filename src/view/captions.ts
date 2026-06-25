@@ -5,86 +5,68 @@ import { PetState } from '../core/petState';
 // 加/删/改句子都行;只要每个池子至少留 1 条。
 const POOLS = {
   egg: [
-    '新人报到!请多指教~',
-    '还在读这仓库的屎山…',
-    '我会很快上手的(大概)',
-    'Hello, World! 是我啦',
+    '入职第一天,工牌还没发…',
+    'onboarding 中,啥都不会',
+    '说好的双休呢?',
+    '新来的牛马,请多关照 🐂',
   ],
   idle: [
-    '……(假装在挂机 💤)',
-    '哼,就知道你会回来',
-    '再不写我要长草了 🌱',
-    '在数你今天摸了几次鱼',
-    'console.log("在吗")',
-    '需求呢?需求在哪?',
+    '摸鱼中 🐟 别戳穿我',
+    '带薪发呆.exe',
+    '老板不在,放个风',
+    '工位都长蘑菇了…',
+    '这点工资,爱干干',
+    '什么时候发工资啊喂',
   ],
   thinking: [
-    '让我想想…(其实在装)',
-    '脑内 npm install 中…',
-    '这题我会,就是嘴硬',
-    '别催,思路在 loading',
+    '在算这月绩效…',
+    '让我想想怎么甩锅',
+    '这需求…装没看见行吗',
+    '脑子 buffering…别催',
   ],
   working: [
-    '干就完了 awa',
-    '手速拉满 ⌨️',
-    '专注.exe 已启动',
-    '别打扰,我在心流里',
-    '这行我写得真优雅(自夸)',
+    '又是为老板搬砖的一天 🧱',
+    'KPI 还差亿点点',
+    '搬砖.jpg 进行中',
+    '这活干得我尾巴都秃了',
+    '资本家的饼是真大啊',
   ],
   done: [
-    '搞定!这有啥难的(才不是侥幸)',
-    "commit message 又是 'fix'?",
-    '✅ 下一个,别松懈',
-    '跑通了…我可没在偷偷高兴',
-    '收工,记得 push 啊喂',
+    '今日 KPI 达标!(才不是为你)',
+    '下班!…哦还没',
+    '又是高产的牛马一天 🐂',
+    '这波我超额了,加鸡腿吧老板',
+    '收工,工资记得打啊喂',
   ],
   confused: [
-    '诶?红了…不是我的锅',
-    '这 bug 比我的像素还糊',
-    '又要去 StackOverflow 抄了?',
+    '需求又双叒变了?!',
+    '锅从天降,稳稳接住',
+    '这 bug…肯定是甲方的锅',
+    '它昨天还好好的(打工人之歌)',
     '先别慌,八成是缓存',
-    '它昨天还好好的(经典甩锅)',
   ],
   evolving: [
-    '我转职啦!✨',
-    '脱胎换骨!别眨眼',
-    '升级——!记得仰望我',
+    '我升职加薪啦!✨',
+    '喜提工龄 +1!',
+    '绩效 A!老板良心发现?',
   ],
   eat: [
-    '好吃~(才不是为了你喂)🍪',
-    '能量 +1,继续卷',
-    '边吃边干,这就是程序员',
+    '工资到账,先恰一口 🍖',
+    '干饭是打工人的尊严',
+    '这顿我自己请(血汗钱)',
+    '吃饱了才有力气搬砖',
   ],
   battle: [
-    '吃我一击!',
     '这 bug 我盯上了 🔍',
-    '哪里跑!断点已埋',
-    '看招——debugger 出动',
+    '加班也要弄死你',
+    '哪里跑!',
+    '看招——为了准点下班',
   ],
   sleep: [
-    '……zzZ 💤',
-    '打个盹,叫我就醒',
-    '梦到 CI 全绿了…',
-    '(假装在挂机,其实在等你)',
-  ],
-  // 分支 × 干活 的专属吐槽
-  builder_working: [
-    '叮叮当当造起来 🔨',
-    '又盖一间(技术债?没听过)',
-    '代码添砖加瓦',
-    '重构使我快乐 🔧',
-  ],
-  debugger_working: [
-    '凶手就在这几行里 🔍',
-    '可疑…非常可疑',
-    'console.log 大法好',
-    '断点摆好,就等它撞上来',
-  ],
-  scholar_working: [
-    '翻文档中 📖',
-    '这段我读过(其实没)',
-    '知识 +1',
-    'RTFM 说的就是你哦',
+    '……zzZ(带薪假寐)💤',
+    '梦到双休了…',
+    '叫我下班就醒',
+    '工位假寐,专业的',
   ],
 } as const;
 
@@ -92,9 +74,9 @@ const POOLS = {
 const TIPS = [
   '💬 /pet 跟我唠两句~',
   '👍 夸我我点头,👎 我摇头给你看',
-  '✍️ 多写代码喂我,攒 xp 能升级转职',
-  '🔨Edit多→工匠 · 🔍Bash多→侦探 · 📖Read多→学者',
-  '✦ 攒够里程碑头顶会亮星星哦',
+  '✍️ 你写代码=给我派活,攒 KPI 升工龄',
+  '💰 工资攒够我自己买吃的(不用你管)',
+  '🏆 KPI 破里程碑就升职加薪',
 ] as const;
 
 function poolFor(state: PetState): readonly string[] {
@@ -103,12 +85,7 @@ function poolFor(state: PetState): readonly string[] {
   if (state.mood === 'confused') return POOLS.confused;
   if (state.mood === 'done') return POOLS.done;
   if (state.mood === 'thinking') return POOLS.thinking;
-  if (state.mood === 'working') {
-    if (state.branch === 'builder') return POOLS.builder_working;
-    if (state.branch === 'debugger') return POOLS.debugger_working;
-    if (state.branch === 'scholar') return POOLS.scholar_working;
-    return POOLS.working;
-  }
+  if (state.mood === 'working') return POOLS.working; // 动物都是打工人,不分职业
   return POOLS.idle;
 }
 
@@ -130,8 +107,8 @@ export function captionForScene(state: PetState, kind: string, idx: number): str
     case 'chest': return pick(POOLS.evolving, idx);
     case 'cookie': return pick(POOLS.eat, idx);
     case 'battle': return pick(POOLS.battle, idx);
-    case 'build': return pick(POOLS.builder_working, idx);
-    case 'study': return pick(POOLS.scholar_working, idx);
+    case 'build': return pick(POOLS.working, idx);
+    case 'study': return pick(POOLS.working, idx);
     // 打盹=空闲:每 3 拍穿插一条玩法提示,教用户怎么玩
     case 'sleep': return idx % 3 === 2 ? pick(TIPS, Math.floor(idx / 3)) : pick(POOLS.sleep, idx);
     default: return captionFor(state, idx);

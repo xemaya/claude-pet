@@ -18,11 +18,11 @@ test('成体:已转职且 xp≥adultXp', () => {
   expect(isAdult(s({ stage: 'branched', branch: 'debugger', xp: CONFIG.adultXp }))).toBe(true);
   expect(isAdult(s({ stage: 'hatchling', xp: CONFIG.adultXp + 1 }))).toBe(false); // 没转职不算成体
 });
-test('称号:新人/见习/转职/大师', () => {
-  expect(titleFor(s({ stage: 'egg' }))).toBe('新人');
-  expect(titleFor(s({ stage: 'hatchling' }))).toBe('见习');
-  expect(titleFor(s({ stage: 'branched', branch: 'scholar', xp: CONFIG.adultXp - 1 }))).toBe('学者');
-  expect(titleFor(s({ stage: 'branched', branch: 'scholar', xp: CONFIG.adultXp }))).toBe('大学者');
+test('称号:动物都是打工人,资深=卷王打工人', () => {
+  expect(titleFor(s({ stage: 'egg' }))).toBe('打工人');
+  expect(titleFor(s({ stage: 'hatchling' }))).toBe('打工人');
+  expect(titleFor(s({ stage: 'branched', branch: 'scholar', xp: CONFIG.adultXp - 1 }))).toBe('打工人');
+  expect(titleFor(s({ stage: 'branched', branch: 'scholar', xp: CONFIG.adultXp }))).toBe('卷王打工人');
 });
 test('里程碑计数', () => {
   const [m0, m1] = CONFIG.milestones;
