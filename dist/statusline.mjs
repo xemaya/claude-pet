@@ -193,8 +193,11 @@ var P = {
   R: "#c0392b",
   u: "#ece6d8",
   // 书(红封 + 书页)
-  G: "#f7e36a"
-  // 闪光/星
+  G: "#f7e36a",
+  // 闪光/星/金币
+  D: "#2b3a55",
+  F: "#e6b48a"
+  // 老板:西装深蓝 + 肤色
 };
 function exp(rows) {
   return rows.map((row) => [...row].map((ch) => P[ch] ?? null));
@@ -267,8 +270,25 @@ var PROPS = {
     ".oRRRRRRo.",
     ".ouuuuuuo.",
     "..oooooo.."
+  ]),
+  // 老板(西装人,彩色,跟白动物区分):路过吓得假装干活
+  boss: exp([
+    "..kkkk..",
+    ".kFFFFk.",
+    ".FkFFkF.",
+    ".FFFFFF.",
+    "..DDDD..",
+    ".DDRDDD.",
+    ".DDRDDD.",
+    ".DD..DD."
   ])
 };
+var COINS_FX = exp([
+  ".G..G.",
+  "..G.G.",
+  "G..G..",
+  ".G.G.."
+]);
 function sceneFor(state, ate) {
   if (state.mood === "evolving") return "chest";
   if (state.mood === "confused") return "battle";
@@ -293,6 +313,8 @@ function propForScene(kind, animFrame) {
       return PROPS.book;
     case "battle":
       return animFrame % 2 === 0 ? PROPS.bug : PROPS.bugHit;
+    case "boss":
+      return PROPS.boss;
     case "sleep":
       return null;
     // 打盹只用台词 💤
@@ -417,9 +439,15 @@ function dialogBox(lines, dividerIdx) {
   out.push(`\u2570${bar}\u256F`);
   return out;
 }
-function renderScenePanel(skin, bodyKey, kind, animFrame, caption, status, adult = false, bob = 0, dx = 0, hat = null, effect = null, emote = null, expr = "neutral") {
+function dimColor(hex, f) {
+  const n = parseInt(hex.slice(1), 16);
+  const r = Math.round((n >> 16 & 255) * f), g2 = Math.round((n >> 8 & 255) * f), b = Math.round((n & 255) * f);
+  return `#${(r << 16 | g2 << 8 | b).toString(16).padStart(6, "0")}`;
+}
+function renderScenePanel(skin, bodyKey, kind, animFrame, caption, status, adult = false, bob = 0, dx = 0, hat = null, effect = null, emote = null, expr = "neutral", dim = 1) {
   const prop = propForScene(kind, animFrame);
-  const canvas = composeCanvas(skin, bodyKey, prop, adult, bob, dx, hat, effect, emote, expr);
+  let canvas = composeCanvas(skin, bodyKey, prop, adult, bob, dx, hat, effect, emote, expr);
+  if (dim < 1) canvas = canvas.map((row) => row.map((c) => c ? dimColor(c, dim) : null));
   const W = canvas[0].length;
   const rows = toHalfBlockRows(canvas);
   const capLines = wrapByWidth(caption, 36, 3);
@@ -776,6 +804,37 @@ function captionForScene(state, kind, idx) {
   }
 }
 
+// src/view/episodes.ts
+var FX_KEYS = ["dim", "boss", "coins", "sweat", "zzz", "heart"];
+var DEFAULT_EPISODES = [
+  // 老板路过:假装很忙
+  { when: { boss: true }, say: "\u8001\u677F\u6765\u4E86!\u5047\u88C5\u5F88\u5FD9 \u{1F4BB}", fx: ["boss", "sweat"] },
+  { when: { boss: true }, say: "\u773C\u775B\u76EF\u5C4F\u5E55,\u624B\u522B\u505C(\u5176\u5B9E\u5728\u6478\u9C7C)", fx: ["boss", "sweat"] },
+  { when: { boss: true }, say: "Alt+Tab \u901F\u5EA6,\u7EC3\u5230\u808C\u8089\u8BB0\u5FC6\u4E86", fx: ["boss", "sweat"] },
+  // 发薪:金币雨
+  { when: { payday: true }, say: "\u53D1\u5DE5\u8D44\u4E86!\u8FD9\u4E2A\u6708\u53C8\u6D3B\u4E0B\u6765\u4E86 \u{1F911}", fx: ["coins"] },
+  { when: { payday: true }, say: "\u5230\u8D26\u77AC\u95F4,\u5DF2\u7ECF\u60F3\u597D\u600E\u4E48\u82B1\u5149\u4E86", fx: ["coins"] },
+  { when: { payday: true }, say: "\u4E3A\u8FD9\u70B9\u94B1\u2026\u7B97\u4E86\u771F\u9999,\u5148\u6070\u4E00\u987F \u{1F356}", fx: ["coins"] },
+  // 深夜加班:调暗
+  { when: { deepNight: true }, say: "\u53C8\u52A0\u73ED\u5230\u8FD9\u70B9\u2026\u56FE\u5565\u554A \u{1F319}", fx: ["dim"] },
+  { when: { deepNight: true }, say: "\u591C\u6DF1\u4E86,\u5DE5\u4F4D\u5C31\u6211\u548C bug \u8FD8\u9192\u7740", fx: ["dim"] },
+  { when: { deepNight: true }, say: "\u8EAB\u4F53\u88AB\u638F\u7A7A,\u4F46\u9700\u6C42\u8FD8\u5728\u6392\u961F", fx: ["dim"] },
+  // 组合:深夜还堆成山(更惨)
+  { when: { deepNight: true, swamped: true }, say: "\u534A\u591C\u8FD8\u5728\u8D76 deadline,\u4EBA\u6CA1\u4E86", fx: ["dim", "sweat"] }
+];
+function matchEpisode(episodes, ctx, idx) {
+  const ok = episodes.filter(
+    (e) => Object.entries(e.when).every(([k, v]) => ctx[k] === v)
+  );
+  if (!ok.length) return null;
+  const spec = (e) => Object.keys(e.when).length;
+  const maxSpec = Math.max(...ok.map(spec));
+  const top = ok.filter((e) => spec(e) === maxSpec);
+  const maxW = Math.max(...top.map((e) => e.weight ?? 1));
+  const best = top.filter((e) => (e.weight ?? 1) === maxW);
+  return best[(idx % best.length + best.length) % best.length];
+}
+
 // src/view/memory.ts
 var FRAMES = [
   (t) => `\u8FD8\u8BB0\u5F97\u4F60\u8BF4\u300C${t}\u300D\u5462`,
@@ -797,11 +856,17 @@ function recallCaption(userMsgs, idx) {
 var Y2 = "#ffe24a";
 var R = "#ff5a5a";
 var B = "#8fd0ff";
+var P2 = "#ff8fc0";
 var g = (rows, map) => rows.map((r) => [...r].map((c) => c === "." ? null : map[c] ?? null));
 var SPARKLE = g([".Y.", "YYY", ".Y."], { Y: Y2 });
 var DOTS = g([".....", "B.B.B"], { B });
 var EXCLAIM = g(["RR", "RR", "..", "RR"], { R });
 var SWEAT = g([".B", "BB", "BB"], { B });
+var HEART = g(["P.P", "PPP", ".P."], { P: P2 });
+var ZZZ = g(["..B", ".B.", "B.."], { B });
+function emoteByKey(key) {
+  return key === "heart" ? HEART : key === "zzz" ? ZZZ : SWEAT;
+}
 function emoteFor(mood) {
   switch (mood) {
     case "thinking":
@@ -947,6 +1012,24 @@ function zooSkin(now, headcount) {
   const crew = crewSprite(Math.floor(now / ZOO_ROTATE_MS), headcount);
   return { egg: crew, hatchling: crew, builder: crew, debugger: crew, scholar: crew, balanced: crew };
 }
+function readEpisodes(dir) {
+  try {
+    const raw = JSON.parse(readFileSync(join(dir, "episodes.json"), "utf8"));
+    if (!Array.isArray(raw)) return DEFAULT_EPISODES;
+    const flags = ["deepNight", "payday", "boss", "striking", "swamped", "idle"];
+    const valid = [];
+    for (const e of raw) {
+      if (!e || typeof e.say !== "string" || !e.when || typeof e.when !== "object") continue;
+      const when = {};
+      for (const [k, v] of Object.entries(e.when)) if (flags.includes(k) && typeof v === "boolean") when[k] = v;
+      const fx = Array.isArray(e.fx) ? e.fx.filter((f) => FX_KEYS.includes(f)) : void 0;
+      valid.push({ when, say: e.say, fx, weight: typeof e.weight === "number" ? e.weight : void 0 });
+    }
+    return [...DEFAULT_EPISODES, ...valid];
+  } catch {
+    return DEFAULT_EPISODES;
+  }
+}
 function exprForMood(mood, now, react) {
   if (react === "nod") return "laugh";
   if (react === "shake") return "cry";
@@ -984,9 +1067,29 @@ function main() {
   const justAte = earned > 0 && wages === 0 && now - lastTurnTs < 6e3;
   const backlog = backlogAt(evs, now);
   const headcount = headcountFor(backlog);
-  const kind = say ? "none" : sceneFor(state, justAte);
   const idx = Math.floor(now / 3e3);
   const animFrame = Math.floor(now / 1500);
+  const hour = new Date(now).getHours();
+  const BOSS_PERIOD = 9e4, BOSS_DUR = 6e3;
+  const ctx = {
+    deepNight: hour >= 23 || hour < 6,
+    payday: justAte,
+    boss: now % BOSS_PERIOD < BOSS_DUR && backlog < SWAMPED_AT,
+    // 摸鱼时老板才来抓
+    striking: backlog >= STRIKE_AT,
+    swamped: backlog >= SWAMPED_AT,
+    idle: backlog <= 0
+  };
+  const ep = say ? null : matchEpisode(readEpisodes(dir), ctx, idx);
+  let dim = ctx.deepNight ? 0.5 : 1, coins = false, bossScene = false;
+  let fxEmote = null;
+  for (const f of ep?.fx ?? []) {
+    if (f === "dim") dim = 0.5;
+    else if (f === "coins") coins = true;
+    else if (f === "boss") bossScene = true;
+    else fxEmote = f;
+  }
+  const kind = say ? "none" : bossScene ? "boss" : sceneFor(state, justAte);
   const ph2 = animFrame % 2, ph4 = Math.floor(now / 700) % 4;
   const moodMotion = {
     done: { bob: ph2 ? 0 : 2, dx: 0 },
@@ -1002,9 +1105,10 @@ function main() {
   };
   const workMotion = { bob: [1, 0, 2, 0][ph4], dx: 0 };
   const idleBreathe = { bob: [1, 0, 1, 2][ph4], dx: [0, 0, 0, 1, 0, 0, 0, -1][Math.floor(now / 900) % 8] };
-  const motion = moodMotion[state.mood] ?? (backlog > 0 ? workMotion : idleBreathe);
+  const motion = bossScene ? workMotion : moodMotion[state.mood] ?? (backlog > 0 ? workMotion : idleBreathe);
   let caption;
   if (say) caption = say.text;
+  else if (ep) caption = ep.say;
   else if (kind === "cookie" || kind === "chest" || kind === "battle") caption = captionForScene(state, kind, idx);
   else if (backlog > 0) caption = backlogCaption(backlog, idx, headcount);
   else {
@@ -1025,14 +1129,15 @@ function main() {
     bob = 1;
     dx = animFrame % 2 ? 1 : -1;
   }
-  const emote = say ? null : emoteFor(state.mood);
+  const emote = say ? null : fxEmote ? emoteByKey(fxEmote) : emoteFor(state.mood);
+  const effectGrid = coins ? COINS_FX : null;
   const react = say?.fresh ? say.react : void 0;
   const expr = exprForMood(state.mood, now, react);
   const prestige = readPrestige(dir);
   const adult = isAdult(state);
   const skin = loadSkin(dir) ?? zooSkin(now, headcount);
   process.stdout.write(
-    renderScenePanel(skin, bodyKeyFor(state), kind, animFrame, caption, formatStatusLine(state, prestige, wages, meals, backlog, headcount), adult, bob, dx, null, null, emote, expr) + "\n"
+    renderScenePanel(skin, bodyKeyFor(state), kind, animFrame, caption, formatStatusLine(state, prestige, wages, meals, backlog, headcount), adult, bob, dx, null, effectGrid, emote, expr, dim) + "\n"
   );
 }
 main();

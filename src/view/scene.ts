@@ -101,14 +101,22 @@ export function dialogBox(lines: string[], dividerIdx?: number): string[] {
  * 完整漫画格:像素场景 + 头部右侧对话框(台词+状态)。
  * 每行加 ANSI 复位护栏(防 Claude 逐行 trim 把 sprite 削斜)。
  */
+// 把颜色按 factor 调暗(深夜加班灯暗);factor<1 才生效,'#rrggbb' → 缩放
+function dimColor(hex: string, f: number): string {
+  const n = parseInt(hex.slice(1), 16);
+  const r = Math.round(((n >> 16) & 255) * f), g = Math.round(((n >> 8) & 255) * f), b = Math.round((n & 255) * f);
+  return `#${((r << 16) | (g << 8) | b).toString(16).padStart(6, '0')}`;
+}
+
 export function renderScenePanel(
   skin: Skin, bodyKey: BodyKey, kind: SceneKind, animFrame: number,
   caption: string, status: string, adult = false, bob = 0, dx = 0,
   hat: Grid | null = null, effect: Grid | null = null, emote: Grid | null = null,
-  expr: ExprKey = 'neutral',
+  expr: ExprKey = 'neutral', dim = 1,
 ): string {
   const prop = propForScene(kind, animFrame);
-  const canvas = composeCanvas(skin, bodyKey, prop, adult, bob, dx, hat, effect, emote, expr);
+  let canvas = composeCanvas(skin, bodyKey, prop, adult, bob, dx, hat, effect, emote, expr);
+  if (dim < 1) canvas = canvas.map((row) => row.map((c) => (c ? dimColor(c, dim) : null))); // 深夜调暗
   const W = canvas[0].length;                                     // sprite 行的显示宽(用于补齐对话框比 sprite 高的行)
   const rows = toHalfBlockRows(canvas);
   const capLines = wrapByWidth(caption, 36, 3);                   // 对话区宽一倍(24→36)、最多 3 行
