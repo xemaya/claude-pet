@@ -15,6 +15,7 @@ const SAY = join(PKG, 'tools', 'pet-say.sh');
 const RESET = join(PKG, 'tools', 'pet-reset.sh');
 const HELP = join(PKG, 'tools', 'pet-help.sh');
 const LINES = join(PKG, 'tools', 'pet-lines.sh');
+const EPISODES = join(PKG, 'tools', 'pet-episodes.sh');
 const CMD_TEMPLATE = join(PKG, 'commands', 'pet.md');
 const CMD_DEST = join(CLAUDE_DIR, 'commands', 'pet.md');
 const CMD_DEST_OLD = join(CLAUDE_DIR, 'commands', 'claude-pet.md'); // 旧命令名,装/卸时清理
@@ -48,7 +49,7 @@ function install() {
   // 安装斜杠命令 /pet(把 say 脚本绝对路径填进模板)
   try {
     mkdirSync(join(CLAUDE_DIR, 'commands'), { recursive: true });
-    const tpl = readFileSync(CMD_TEMPLATE, 'utf8').replaceAll('__SAY_CMD__', SAY).replaceAll('__RESET_CMD__', RESET).replaceAll('__HELP_CMD__', HELP).replaceAll('__SHOP_CMD__', SHOP_CMD).replaceAll('__LINES_CMD__', LINES);
+    const tpl = readFileSync(CMD_TEMPLATE, 'utf8').replaceAll('__SAY_CMD__', SAY).replaceAll('__RESET_CMD__', RESET).replaceAll('__HELP_CMD__', HELP).replaceAll('__SHOP_CMD__', SHOP_CMD).replaceAll('__LINES_CMD__', LINES).replaceAll('__EPISODES_CMD__', EPISODES);
     writeFileSync(CMD_DEST, tpl);
     if (existsSync(CMD_DEST_OLD)) rmSync(CMD_DEST_OLD); // 清掉旧 /claude-pet 命令
   } catch { /* 可选,失败不致命 */ }
